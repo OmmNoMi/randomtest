@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "Random Testing",
+    "version": "1.0.1",
+    "description": "Premium tool to automate employee lists and select entries for random testing.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://labbreport.com/screener/organizationEmployee*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "inject.css"
+            ]
+        }
+    ],
+    "host_permissions": [
+        "https://labbreport.com/*"
+    ]
+}

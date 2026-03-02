@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Testing</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="logo">RANDOM<span>TESTING</span></div>
+                <button id="expand-btn" class="icon-btn" title="Open in Full View">
+                    <span>↗</span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div id="setup-view">
+                <div id="info-banner" class="info-banner hidden">
+                    <div class="info-row">
+                        <span class="label">Organization:</span>
+                        <span id="display-org-name" class="value">---</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Total Members:</span>
+                        <span id="display-total-records" class="value">---</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Org ID:</span>
+                        <span id="display-org-id" class="value">---</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Logged In:</span>
+                        <span id="display-user" class="value">---</span>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <p id="status-text">Ready to scan and extract list.</p>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                </div>
+
+                <button id="build-btn" class="primary-btn">
+                    <span class="icon">🔍</span>
+                    Build Master List
+                </button>
+            </div>
+
+            <div id="selection-view" class="hidden">
+                <div class="status-card success">
+                    <p id="extraction-summary">Ready to select from 0 employees.</p>
+                </div>
+
+                <div class="filter-controls">
+                    <div class="controls-group">
+                        <label>Employment Type Filter:</label>
+                        <div id="type-multi-select" class="multi-select">
+                            <div class="select-box">Select Types</div>
+                            <div class="options-container hidden" id="type-options">
+                                <!-- Dynamic options here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list-section">
+                    <div class="section-header">
+                        <h3>Employee Master Pool</h3>
+                        <span id="pool-count">Showing 0 available</span>
+                    </div>
+                    <p class="section-hint">× Remove employees unavailable for lab testing before picking random.</p>
+                    <div id="main-employee-list" class="styled-list">
+                        <!-- List items here -->
+                    </div>
+                </div>
+
+                <div class="action-footer">
+                    <div class="controls-group">
+                        <label for="random-count">Selection Count:</label>
+                        <input type="number" id="random-count" value="1" min="1" class="modern-input">
+                    </div>
+
+                    <button id="select-random-btn" class="accent-btn">
+                        <span class="icon">🎲</span>
+                        Generate Random Selection
+                    </button>
+
+                    <button id="download-all-csv" class="secondary-btn">Download Master Pool (CSV)</button>
+                </div>
+            </div>
+
+            <div id="winner-view" class="hidden">
+                <div class="status-card success">
+                    <p>Random Selection Complete</p>
+                </div>
+                <h3>Selected Employees:</h3>
+                <div id="winner-list"></div>
+
+                <div class="winner-actions">
+                    <button id="download-winners-csv" class="accent-btn">
+                        <span class="icon">📥</span> Export Selected (CSV)
+                    </button>
+                    <button id="reset-btn" class="secondary-btn">Start New Selection</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Premium Testing Utility • Astra Engine</p>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

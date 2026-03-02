@@ -1,0 +1,5 @@
+.rt-scanned {
+    box-shadow: inset 4px 0 0 #a855f7 !important;
+    background-color: rgba(168, 85, 247, 0.05) !important;
+    transition: background-color 0.4s ease;
+}
