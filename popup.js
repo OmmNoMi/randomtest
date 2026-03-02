@@ -46,22 +46,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Multi-select elements
     const multiSelect = document.getElementById('type-multi-select');
     const typeOptions = document.getElementById('type-options');
-    const selectBox = multiSelect.querySelector('.select-box');
-
-    // Check for cached metadata
-    chrome.storage.local.get(['lastScan'], (result) => {
-        if (result.lastScan) {
-            showInfoBanner(result.lastScan);
-        }
-    });
+    // Safely get selectBox with null check
+    const selectBox = multiSelect ? multiSelect.querySelector('.select-box') : null;
 
     function showInfoBanner(meta) {
+        if (!meta) return;
         displayOrgName.innerText = meta.orgName || '---';
         displayTotalRecords.innerText = meta.totalRecords || '---';
         displayOrgId.innerText = meta.orgId || '---';
         displayUser.innerText = meta.userName || '---';
         infoBanner.classList.remove('hidden');
     }
+
+    // group all initial storage gets at the end of definitions
+    function init() {
+        chrome.storage.local.get(['lastScan'], (result) => {
+            if (result.lastScan) {
+                showInfoBanner(result.lastScan);
+            }
+        });
+    }
+
+    init();
 
     // In popup context, we need to find the correct Labb tab
     async function getLabbTab() {
@@ -185,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSelectBoxText() {
+        if (!selectBox) return;
         if (selectedTypes.size === 0) {
             selectBox.innerText = 'All Types (Default)';
         } else if (selectedTypes.size === 1) {
