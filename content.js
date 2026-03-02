@@ -36,46 +36,61 @@
             const urlParams = new URLSearchParams(window.location.search);
             const orgId = urlParams.get('organization_id') || '---';
 
-            // Utility to check if a string is a pagination count (e.g., "10 of 24")
-            const isPagination = (str) => /\d+\s+of\s+\d+/.test(str);
+            // Regex to check if a string contains pagination like "10 of 24"
+            const paginationRegex = /\d+\s+of\s+\d+/i;
+            const isPagination = (str) => paginationRegex.test(str);
 
+            // Fetch candidate elements
             const h3Text = document.querySelector('h3')?.innerText.trim() || '';
             const paginationSummary = document.querySelector('.pull-right strong, .pagination-summary')?.innerText.trim() || '';
-            const subNavText = document.querySelector('.nav-tabs li.active a, .sub-navbar li:first-child a')?.innerText.trim() || '';
-            const tableFirstOrg = document.querySelector('table tbody tr td:first-child')?.innerText.trim() || '';
 
-            // 1. Extract Total Records (Priority: any text matching X of Y)
+            // Find "Managing Advanced Trucking LLC" in the sub-nav or brand logo
+            const subNavBrand = document.querySelector('.nav-tabs li:first-child')?.parentElement?.previousElementSibling?.innerText.trim() ||
+                document.querySelector('.nav-tabs li.active a, .sub-navbar li.active a')?.innerText.trim() ||
+                document.querySelector('.breadcrumb li:last-child')?.innerText.trim() || '';
+
+            const tableFirstOrgCell = document.querySelector('table tbody tr td:first-child')?.innerText.trim() || '';
+
+            // 1. Extract Total Records (Targeting "X of Y")
             let totalRecords = '---';
-            if (isPagination(h3Text)) {
-                totalRecords = h3Text.match(/\d+\s+of\s+\d+/)[0];
-            } else if (isPagination(paginationSummary)) {
-                totalRecords = paginationSummary.match(/\d+\s+of\s+\d+/)[0];
+            const countMatch = h3Text.match(paginationRegex) || paginationSummary.match(paginationRegex);
+            if (countMatch) {
+                totalRecords = countMatch[0];
             } else if (paginationSummary) {
                 totalRecords = paginationSummary;
             }
 
-            // 2. Extract Organization Name (Priority: sub-nav, then table cell, then cleaned h3)
+            // 2. Extract Organization Name
             let orgName = 'Unknown Org';
 
-            if (subNavText && !isPagination(subNavText) && !subNavText.includes('Employees')) {
-                orgName = subNavText;
-            } else if (tableFirstOrg && !isPagination(tableFirstOrg)) {
-                orgName = tableFirstOrg;
-            } else if (h3Text.includes('Employees of')) {
-                orgName = h3Text.replace('Employees of', '').split('|')[0].trim();
-            } else if (h3Text && !isPagination(h3Text)) {
-                orgName = h3Text.split('|')[0].trim();
-            } else {
-                // Fallback: Breadcrumbs
-                const crumbs = [...document.querySelectorAll('.breadcrumb li')].map(li => li.innerText.trim());
-                orgName = crumbs.find(c => !isPagination(c) && !['Dashboard', 'Home', 'Employees'].includes(c)) || 'Unknown Org';
+            // Look for specific business name patterns in headers or sub-nav
+            const headers = [...document.querySelectorAll('h1, h2, h3, h4, .navbar-brand')].map(h => h.innerText.trim());
+            const navLinks = [...document.querySelectorAll('.nav-tabs li a, .sub-navbar li a, .breadcrumb li')].map(l => l.innerText.trim());
+
+            const candidates = [subNavBrand, ...navLinks, ...headers, tableFirstRowOrgCell];
+
+            // Priority: Find something that isn't pagination and isn't a common label
+            const genericLabels = ['Employees', 'Results', 'Contacts', 'Donors', 'Labb Passports', 'Panels', 'Reporting', 'Dashboard', 'Home'];
+
+            orgName = candidates.find(c =>
+                c &&
+                !isPagination(c) &&
+                !genericLabels.includes(c) &&
+                c.length > 3 &&
+                !c.includes('Portal User')
+            ) || 'Unknown Org';
+
+            // If we found something like "Employees of [Org]", clean it
+            if (orgName.includes('Employees of')) {
+                orgName = orgName.replace('Employees of', '').trim();
             }
 
-            // Final safety: Remove any pagination text if it somehow crept in
-            orgName = orgName.replace(/\d+\s+of\s+\d+/, '').replace(/^\|\s*/, '').trim();
+            // Final Polish: Clean up any remaining artifacts
+            orgName = orgName.split('|')[0].replace(/^\|\s*/, '').trim();
 
             const userName = document.querySelector('.navbar-right .dropdown-toggle, #user-name, .user-profile-link')?.innerText.trim() || 'Portal User';
 
+            console.log('RandomTesting: Metadata Extracted:', { orgId, orgName, userName, totalRecords });
             return { orgId, orgName, userName, totalRecords, scanDate: new Date().toLocaleString() };
         }
 

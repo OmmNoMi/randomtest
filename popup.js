@@ -81,16 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Toggle multi-select options
-    selectBox.addEventListener('click', (e) => {
-        e.stopPropagation();
-        typeOptions.classList.toggle('hidden');
-    });
+    if (selectBox && typeOptions) {
+        selectBox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            typeOptions.classList.toggle('hidden');
+        });
+
+        typeOptions.addEventListener('click', (e) => e.stopPropagation());
+    }
 
     document.addEventListener('click', () => {
-        typeOptions.classList.add('hidden');
+        if (typeOptions) typeOptions.classList.add('hidden');
     });
-
-    typeOptions.addEventListener('click', (e) => e.stopPropagation());
 
     // Phase 1: Build Master List
     buildBtn.addEventListener('click', async () => {
