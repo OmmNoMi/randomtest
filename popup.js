@@ -150,6 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (message.metadata) {
                 showInfoBanner(message.metadata);
             }
+        } else if (message.type === 'extraction_error') {
+            statusCard.classList.remove('processing');
+            statusText.innerText = `Error: ${message.message}`;
+            buildBtn.disabled = false;
+            buildBtn.innerHTML = '<span class="icon">🔍</span> Build Master List';
         } else if (message.type === 'extraction_complete') {
             statusCard.classList.remove('processing');
             allEmployees = message.data.map((emp, index) => ({ ...emp, id: index }));
