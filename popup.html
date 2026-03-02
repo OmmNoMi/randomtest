@@ -19,27 +19,29 @@
             </div>
         </header>
 
+        <div id="info-banner" class="info-banner">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">Organization</span>
+                    <span id="display-org-name" class="value">Detecting...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Total Members</span>
+                    <span id="display-total-records" class="value">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Org ID</span>
+                    <span id="display-org-id" class="value">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">User</span>
+                    <span id="display-user" class="value">---</span>
+                </div>
+            </div>
+        </div>
+
         <main>
             <div id="setup-view">
-                <div id="info-banner" class="info-banner hidden">
-                    <div class="info-row">
-                        <span class="label">Organization:</span>
-                        <span id="display-org-name" class="value">---</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Total Members:</span>
-                        <span id="display-total-records" class="value">---</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Org ID:</span>
-                        <span id="display-org-id" class="value">---</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Logged In:</span>
-                        <span id="display-user" class="value">---</span>
-                    </div>
-                </div>
-
                 <div class="status-card">
                     <p id="status-text">Ready to scan and extract list.</p>
                     <div class="progress-bar-container">
@@ -92,7 +94,10 @@
                         Generate Random Selection
                     </button>
 
-                    <button id="download-all-csv" class="secondary-btn">Download Master Pool (CSV)</button>
+                    <div class="secondary-actions">
+                        <button id="download-all-csv" class="secondary-btn">Download Master Pool (CSV)</button>
+                        <button id="clear-scan-btn" class="danger-link-btn">Clear Results & Scan New</button>
+                    </div>
                 </div>
             </div>
 

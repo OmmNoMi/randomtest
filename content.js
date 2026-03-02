@@ -197,6 +197,8 @@
         } else if (request.action === 'START_EXTRACTION') {
             scanner.start(request.itemsPerPage || 50);
             sendResponse({ status: 'ACK' });
+        } else if (request.action === 'GET_METADATA') {
+            sendResponse({ metadata: scanner.extractMetadata() });
         }
         return true;
     });

@@ -15,56 +15,124 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide expand button if we're already in a full tab
     if (window.innerWidth > 500) {
         expandBtn.style.display = 'none';
-        document.body.style.width = '100%';
-        document.body.style.maxWidth = '600px';
-        document.body.style.margin = '0 auto';
+        document.body.style.width = '100vw';
+        document.body.style.margin = '0';
     }
 
     expandBtn.addEventListener('click', () => {
-        chrome.tabs.create({ url: 'popup.html' });
+        chrome.tabs.create({ url: chrome.runtime.getURL('popup.html') });
     });
 
     const infoBanner = document.getElementById('info-banner');
+    const statusText = document.getElementById('status-text');
+    const progressBar = document.getElementById('progress-bar');
     const displayOrgName = document.getElementById('display-org-name');
     const displayTotalRecords = document.getElementById('display-total-records');
     const displayOrgId = document.getElementById('display-org-id');
     const displayUser = document.getElementById('display-user');
 
-    const statusText = document.getElementById('status-text');
-    const progressBar = document.getElementById('progress-bar');
     const extractionSummary = document.getElementById('extraction-summary');
-    const winnerList = document.getElementById('winner-list');
     const mainEmployeeList = document.getElementById('main-employee-list');
     const poolCountText = document.getElementById('pool-count');
     const countInput = document.getElementById('random-count');
+    const winnerList = document.getElementById('winner-list');
 
+    // State
     let allEmployees = [];
-    let selectedTypes = new Set();
-    let removedIds = new Set();
     let selectedWinners = [];
+    let removedIds = new Set();
+    const selectedTypes = new Set();
 
-    // Multi-select elements
+    // Multi-select logic
     const multiSelect = document.getElementById('type-multi-select');
     const typeOptions = document.getElementById('type-options');
-    // Safely get selectBox with null check
     const selectBox = multiSelect ? multiSelect.querySelector('.select-box') : null;
 
     function showInfoBanner(meta) {
         if (!meta) return;
-        displayOrgName.innerText = meta.orgName || '---';
-        displayTotalRecords.innerText = meta.totalRecords || '---';
-        displayOrgId.innerText = meta.orgId || '---';
-        displayUser.innerText = meta.userName || '---';
-        infoBanner.classList.remove('hidden');
+
+        const updateField = (id, val) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerText = val || '---';
+            if (!val || val === '---' || val.includes('Detecting') || val.includes('Searching')) {
+                el.classList.add('detecting');
+            } else {
+                el.classList.remove('detecting');
+            }
+        };
+
+        updateField('display-org-name', meta.orgName);
+        updateField('display-total-records', meta.totalRecords);
+        updateField('display-org-id', meta.orgId);
+        updateField('display-user', meta.userName);
     }
 
-    // group all initial storage gets at the end of definitions
-    function init() {
-        chrome.storage.local.get(['lastScan'], (result) => {
-            if (result.lastScan) {
-                showInfoBanner(result.lastScan);
-            }
-        });
+    async function init() {
+        // 1. Check for active scan state or completed results in storage
+        const storage = await chrome.storage.local.get(['rt_scan_state', 'lastScan', 'allEmployees', 'removedIds']);
+
+        if (storage.allEmployees && storage.allEmployees.length > 0) {
+            console.log('Popup: Loading completed scan results from storage.');
+            allEmployees = storage.allEmployees;
+            removedIds = new Set(storage.removedIds || []);
+            if (storage.lastScan) showInfoBanner(storage.lastScan);
+
+            populateTypeFilters();
+            renderIntegratedPool();
+            updatePoolCounts();
+            setupView.classList.add('hidden');
+            selectionView.classList.remove('hidden');
+        } else if (storage.rt_scan_state && storage.rt_scan_state.isScanning) {
+            console.log('Popup: Resuming view from active scan state.');
+            showInfoBanner(storage.rt_scan_state.metadata);
+            statusCard.classList.add('processing');
+            buildBtn.disabled = true;
+            buildBtn.innerHTML = '<span class="icon">⌛</span> Scanning...';
+            statusText.innerText = 'Extraction in progress...';
+        } else if (storage.lastScan) {
+            showInfoBanner(storage.lastScan);
+        }
+
+        // 2. Start heartbeat for metadata detection
+        autoDetectMetadata();
+    }
+
+    async function autoDetectMetadata() {
+        const tab = await getLabbTab();
+        if (tab) {
+            chrome.tabs.sendMessage(tab.id, { action: 'GET_METADATA' }, async (response) => {
+                if (chrome.runtime.lastError || !response) {
+                    // Try to inject if script is missing
+                    await injectScript(tab.id);
+                    // Use a slightly longer timeout after injection attempt
+                    setTimeout(autoDetectMetadata, 2000);
+                } else if (response.metadata) {
+                    showInfoBanner(response.metadata);
+                }
+            });
+        } else {
+            // Provide feedback that we're still looking
+            showInfoBanner({
+                orgName: 'Searching for Labb Page...',
+                totalRecords: '---',
+                orgId: '---',
+                userName: '---'
+            });
+            setTimeout(autoDetectMetadata, 3000);
+        }
+    }
+
+    async function injectScript(tabId) {
+        try {
+            await chrome.scripting.executeScript({
+                target: { tabId },
+                files: ['content.js']
+            });
+            console.log('Popup: Successfully injected content script.');
+        } catch (e) {
+            console.error('Popup: Injections failed:', e);
+        }
     }
 
     init();
@@ -73,10 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getLabbTab() {
         // First try the current active tab
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (activeTab && activeTab.url?.includes('labbreport.com/screener/organizationEmployee')) return activeTab;
+        if (activeTab && (activeTab.url?.includes('labbreport.com') || activeTab.url?.includes('labb.com'))) return activeTab;
 
         // Otherwise find any Labb tab
-        const allTabs = await chrome.tabs.query({ url: "*://labbreport.com/screener/organizationEmployee*" });
+        const allTabs = await chrome.tabs.query({ url: ["*://labbreport.com/*", "*://labb.com/*"] });
         return allTabs[0] || null;
     }
 
@@ -118,27 +186,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     target: { tabId: tab.id },
                     files: ['content.js']
                 }, () => {
-                    setTimeout(() => startScan(tab.id), 200);
+                    if (chrome.runtime.lastError) {
+                        statusText.innerText = 'Error: Script injection failed.';
+                        buildBtn.disabled = false;
+                        statusCard.classList.remove('processing');
+                    } else {
+                        // Retry start
+                        chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
+                    }
                 });
             } else {
-                startScan(tab.id);
+                chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
             }
         });
     });
-
-    function startScan(tabId) {
-        statusText.innerText = 'Scanner active. Processing...';
-        chrome.tabs.sendMessage(tabId, {
-            action: 'START_EXTRACTION',
-            itemsPerPage: 50 // Automatically set to 50
-        }, (response) => {
-            if (chrome.runtime.lastError) {
-                statusText.innerText = 'Error: Could not start scanner.';
-                buildBtn.disabled = false;
-                statusCard.classList.remove('processing');
-            }
-        });
-    }
 
     // Handle Progress & Results
     chrome.runtime.onMessage.addListener((message) => {
@@ -161,7 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (message.metadata) {
                 showInfoBanner(message.metadata);
-                chrome.storage.local.set({ lastScan: message.metadata });
+                chrome.storage.local.set({
+                    lastScan: message.metadata,
+                    allEmployees: allEmployees
+                });
             }
 
             populateTypeFilters();
@@ -239,6 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.innerHTML = '↺';
                 }
                 updatePoolCounts();
+                // Persist removal state
+                chrome.storage.local.set({ removedIds: [...removedIds] });
             });
 
             mainEmployeeList.appendChild(item);
@@ -260,20 +326,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Selection Logic
-    selectRandomBtn.addEventListener('click', () => {
-        const pool = getFilteredPool();
-        const count = parseInt(countInput.value) || 1;
+    if (selectRandomBtn) {
+        selectRandomBtn.addEventListener('click', () => {
+            const pool = getFilteredPool();
+            const count = parseInt(countInput.value) || 1;
 
-        if (pool.length === 0) {
-            alert('No available employees in the current filtered pool.');
-            return;
-        }
+            if (pool.length === 0) {
+                alert('No available employees in the current filtered pool.');
+                return;
+            }
 
-        const shuffled = [...pool].sort(() => 0.5 - Math.random());
-        selectedWinners = shuffled.slice(0, Math.min(count, pool.length));
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            selectedWinners = shuffled.slice(0, Math.min(count, pool.length));
 
-        showWinners(selectedWinners);
-    });
+            showWinners(selectedWinners);
+        });
+    }
 
     function showWinners(selected) {
         winnerList.innerHTML = '';
@@ -292,10 +360,12 @@ document.addEventListener('DOMContentLoaded', () => {
         winnerView.classList.remove('hidden');
     }
 
-    resetBtn.addEventListener('click', () => {
-        winnerView.classList.add('hidden');
-        selectionView.classList.remove('hidden');
-    });
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            winnerView.classList.add('hidden');
+            selectionView.classList.remove('hidden');
+        });
+    }
 
     // CSV Exports
     function downloadCSV(data, filename) {
@@ -314,12 +384,26 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
     }
 
-    downloadAllCsvBtn.addEventListener('click', () => {
-        const pool = getFilteredPool();
-        downloadCSV(pool, 'Labb_Employee_Master_Pool');
-    });
+    if (downloadAllCsvBtn) {
+        downloadAllCsvBtn.addEventListener('click', () => {
+            const pool = getFilteredPool();
+            downloadCSV(pool, 'Labb_Employee_Master_Pool');
+        });
+    }
 
-    downloadWinnersCsvBtn.addEventListener('click', () => {
-        downloadCSV(selectedWinners, 'Random_Testing_Selected_Employees');
-    });
+    if (downloadWinnersCsvBtn) {
+        downloadWinnersCsvBtn.addEventListener('click', () => {
+            downloadCSV(selectedWinners, 'Random_Testing_Selected_Employees');
+        });
+    }
+
+    const clearScanBtn = document.getElementById('clear-scan-btn');
+    if (clearScanBtn) {
+        clearScanBtn.addEventListener('click', async () => {
+            if (confirm('This will delete all current scan results and reset the app. Are you sure?')) {
+                await chrome.storage.local.clear();
+                window.location.reload();
+            }
+        });
+    }
 });
