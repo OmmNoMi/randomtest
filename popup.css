@@ -300,14 +300,14 @@ header {
 }
 
 .filter-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.3);
+    padding: 18px;
+    border-radius: 12px 12px 0 0;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 /* Multi-select Styles */
@@ -368,12 +368,24 @@ header {
 }
 
 /* Integrated List & Pool Layout */
-.list-section {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 24px;
+.filter-controls {
+    background: rgba(30, 41, 59, 0.4);
     padding: 20px;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.list-section {
+    background: rgba(30, 41, 59, 0.4);
+    padding: 0 20px 24px 20px;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: none;
+    margin-bottom: 32px;
 }
 
 .section-header {
@@ -492,22 +504,65 @@ header {
     color: var(--text-secondary);
 }
 
-.secondary-actions {
+.controls-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.controls-row .controls-group {
+    flex: 0 0 100px;
+}
+
+.toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+}
+
+.toggle-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.toggle-group .hint {
+    font-size: 0.7rem;
+    color: var(--accent);
+    opacity: 0.8;
+}
+
+.action-footer {
     display: flex;
     flex-direction: column;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.csv-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
+    margin-bottom: 8px;
+}
+
+.secondary-actions {
+    margin-top: 16px;
+    text-align: center;
 }
 
 .danger-link-btn {
     background: transparent;
     border: none;
     color: #ef4444;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     text-decoration: underline;
     opacity: 0.7;
     transition: opacity 0.2s;
-    padding: 8px;
+    padding: 12px;
 }
 
 .danger-link-btn:hover {

@@ -236,8 +236,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const excludeTerminatedToggle = document.getElementById('exclude-terminated-toggle');
+    const downloadPoolCsvBtn = document.getElementById('download-pool-csv');
+
+    if (excludeTerminatedToggle) {
+        excludeTerminatedToggle.addEventListener('change', () => {
+            renderIntegratedPool();
+            updatePoolCounts();
+        });
+    }
+
     function populateTypeFilters() {
-        const types = [...new Set(allEmployees.map(emp => emp.type))].sort();
+        const types = [...new Set(allEmployees.map(emp => emp.type || 'Standard'))].sort();
         typeOptions.innerHTML = '';
         selectedTypes.clear();
 
@@ -274,20 +284,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderIntegratedPool() {
         mainEmployeeList.innerHTML = '';
-        const currentList = allEmployees.filter(emp => selectedTypes.size === 0 || selectedTypes.has(emp.type));
+        const currentList = getFilteredPool(true); // Get list ignoring manual removals for display
 
         currentList.forEach(emp => {
             const item = document.createElement('div');
             item.className = 'list-item';
-            if (removedIds.has(emp.id)) item.style.opacity = '0.35';
+            const isRemoved = removedIds.has(emp.id);
+            if (isRemoved) item.style.opacity = '0.35';
 
             item.innerHTML = `
                 <div class="item-info">
                     <h5>${emp.firstName} ${emp.lastName}</h5>
-                    <p>${emp.type} | ${emp.organization}</p>
+                    <p>${emp.type || 'Standard'} | ${emp.status} | ${emp.organization}</p>
                 </div>
-                <button class="remove-btn" title="${removedIds.has(emp.id) ? 'Restore' : 'Exclude'}">
-                    ${removedIds.has(emp.id) ? '↺' : '×'}
+                <button class="remove-btn" title="${isRemoved ? 'Restore' : 'Exclude'}">
+                    ${isRemoved ? '↺' : '×'}
                 </button>
             `;
 
@@ -303,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.innerHTML = '↺';
                 }
                 updatePoolCounts();
-                // Persist removal state
                 chrome.storage.local.set({ removedIds: [...removedIds] });
             });
 
@@ -311,11 +321,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function getFilteredPool() {
+    function getFilteredPool(ignoreManualRemovals = false) {
         return allEmployees.filter(emp => {
-            const matchesType = selectedTypes.size === 0 || selectedTypes.has(emp.type);
-            const isAvailable = !removedIds.has(emp.id);
-            return matchesType && isAvailable;
+            const matchesType = selectedTypes.size === 0 || selectedTypes.has(emp.type || 'Standard');
+            const isTerminated = (emp.status || '').toLowerCase().includes('terminated');
+            const statusMatch = !excludeTerminatedToggle.checked || !isTerminated;
+
+            const isManualRemoved = !ignoreManualRemovals && removedIds.has(emp.id);
+            return matchesType && statusMatch && !isManualRemoved;
         });
     }
 
@@ -323,6 +336,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const pool = getFilteredPool();
         poolCountText.innerText = `Showing ${pool.length} available`;
         extractionSummary.innerText = `Ready to select from ${pool.length} employees.`;
+
+        // Final sanity check: if 18/24, maybe show why
+        const total = allEmployees.length;
+        if (pool.length < total) {
+            const filteredOut = total - pool.length;
+            extractionSummary.innerText += ` (${filteredOut} filtered out)`;
+        }
     }
 
     // Selection Logic
@@ -386,8 +406,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (downloadAllCsvBtn) {
         downloadAllCsvBtn.addEventListener('click', () => {
+            downloadCSV(allEmployees, 'Labb_Full_Employee_Export');
+        });
+    }
+
+    if (downloadPoolCsvBtn) {
+        downloadPoolCsvBtn.addEventListener('click', () => {
             const pool = getFilteredPool();
-            downloadCSV(pool, 'Labb_Employee_Master_Pool');
+            downloadCSV(pool, 'Labb_Filtered_Pool_Selection');
         });
     }
 

@@ -62,10 +62,17 @@
 
                 <div class="filter-controls">
                     <div class="controls-group">
-                        <label>Employment Type Filter:</label>
+                        <label>Exclude Terminated:</label>
+                        <div class="toggle-group">
+                            <input type="checkbox" id="exclude-terminated-toggle" checked>
+                            <span class="hint">Recommended</span>
+                        </div>
+                    </div>
+                    <div class="controls-group">
+                        <label>Employment Type:</label>
                         <div id="type-multi-select" class="multi-select">
-                            <div class="select-box">Select Types</div>
-                            <div class="options-container hidden" id="type-options">
+                            <div class="select-box">All Types (Default)</div>
+                            <div id="type-options" class="options-container hidden">
                                 <!-- Dynamic options here -->
                             </div>
                         </div>
@@ -77,25 +84,30 @@
                         <h3>Employee Master Pool</h3>
                         <span id="pool-count">Showing 0 available</span>
                     </div>
-                    <p class="section-hint">× Remove employees unavailable for lab testing before picking random.</p>
+                    <p class="section-hint">× Exclude individuals from this pool before picking random.</p>
                     <div id="main-employee-list" class="styled-list">
                         <!-- List items here -->
                     </div>
                 </div>
 
                 <div class="action-footer">
-                    <div class="controls-group">
-                        <label for="random-count">Selection Count:</label>
-                        <input type="number" id="random-count" value="1" min="1" class="modern-input">
+                    <div class="controls-row">
+                        <div class="controls-group">
+                            <label for="random-count">Pick Count:</label>
+                            <input type="number" id="random-count" value="1" min="1" class="modern-input">
+                        </div>
+                        <button id="select-random-btn" class="accent-btn">
+                            <span class="icon">🎲</span> Run Selection
+                        </button>
                     </div>
 
-                    <button id="select-random-btn" class="accent-btn">
-                        <span class="icon">🎲</span>
-                        Generate Random Selection
-                    </button>
-
                     <div class="secondary-actions">
-                        <button id="download-all-csv" class="secondary-btn">Download Master Pool (CSV)</button>
+                        <div class="csv-actions">
+                            <button id="download-all-csv" class="secondary-btn">Download Full Master Pool (All
+                                records)</button>
+                            <button id="download-pool-csv" class="secondary-btn">Download Filtered Pool (Current
+                                view)</button>
+                        </div>
                         <button id="clear-scan-btn" class="danger-link-btn">Clear Results & Scan New</button>
                     </div>
                 </div>

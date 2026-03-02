@@ -55,7 +55,9 @@
                     const exists = this.data.some(existing =>
                         existing.firstName === emp.firstName &&
                         existing.lastName === emp.lastName &&
-                        existing.dob === emp.dob
+                        existing.dob === emp.dob &&
+                        existing.type === emp.type &&
+                        existing.status === emp.status
                     );
                     if (!exists) this.data.push(emp);
                 });
@@ -125,17 +127,28 @@
             const results = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                if (cells.length >= 7) {
-                    results.push({
+                // The table has 8 columns: Org, First, Last, DOB, Phone, Position, Type, Status
+                if (cells.length >= 6) {
+                    const rowData = {
                         organization: cells[0]?.innerText.trim(),
                         firstName: cells[1]?.innerText.trim(),
                         lastName: cells[2]?.innerText.trim(),
                         dob: cells[3]?.innerText.trim(),
                         phone: cells[4]?.innerText.trim(),
-                        email: cells[5]?.innerText.trim(),
-                        status: cells[6]?.innerText.trim(),
-                        type: 'Standard'
-                    });
+                        position: cells[5]?.innerText.trim(),
+                        type: cells[6]?.innerText.trim() || 'Standard',
+                        status: cells[cells.length - 1]?.innerText.trim() || 'Active'
+                    };
+
+                    // Action buttons are also in a cell usually, let's filter them out of status
+                    if (rowData.status.includes('VIEW/UPDATE')) {
+                        // If status is in the same cell as actions, or column 6 was type
+                        // actually looking at screenshots, type/status are separate if available
+                        // We'll fallback to checking the row class or specific text
+                        rowData.status = row.classList.contains('terminated') ? 'Terminated' : 'Active';
+                    }
+
+                    results.push(rowData);
                     row.classList.add('rt-scanned');
                 }
             });
