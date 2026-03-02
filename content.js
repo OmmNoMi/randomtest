@@ -34,23 +34,47 @@
 
         extractMetadata() {
             const urlParams = new URLSearchParams(window.location.search);
-            const orgId = urlParams.get('organization_id');
+            const orgId = urlParams.get('organization_id') || '---';
 
-            // Refined Org Name Selector
-            let orgName = 'Unknown Org';
-            const h3 = document.querySelector('h3')?.innerText || '';
-            const breadcrumb = document.querySelector('ul.breadcrumb li.active, .breadcrumb li:last-child')?.innerText || '';
+            // Utility to check if a string is a pagination count (e.g., "10 of 24")
+            const isPagination = (str) => /\d+\s+of\s+\d+/.test(str);
 
-            if (h3.includes('Employees of')) {
-                orgName = h3.replace('Employees of', '').trim();
-            } else if (breadcrumb && !breadcrumb.includes('of') && !breadcrumb.includes('Records')) {
-                orgName = breadcrumb.trim();
-            } else if (h3) {
-                orgName = h3.split('|')[0].trim();
+            const h3Text = document.querySelector('h3')?.innerText.trim() || '';
+            const paginationSummary = document.querySelector('.pull-right strong, .pagination-summary')?.innerText.trim() || '';
+            const subNavText = document.querySelector('.nav-tabs li.active a, .sub-navbar li:first-child a')?.innerText.trim() || '';
+            const tableFirstOrg = document.querySelector('table tbody tr td:first-child')?.innerText.trim() || '';
+
+            // 1. Extract Total Records (Priority: any text matching X of Y)
+            let totalRecords = '---';
+            if (isPagination(h3Text)) {
+                totalRecords = h3Text.match(/\d+\s+of\s+\d+/)[0];
+            } else if (isPagination(paginationSummary)) {
+                totalRecords = paginationSummary.match(/\d+\s+of\s+\d+/)[0];
+            } else if (paginationSummary) {
+                totalRecords = paginationSummary;
             }
 
+            // 2. Extract Organization Name (Priority: sub-nav, then table cell, then cleaned h3)
+            let orgName = 'Unknown Org';
+
+            if (subNavText && !isPagination(subNavText) && !subNavText.includes('Employees')) {
+                orgName = subNavText;
+            } else if (tableFirstOrg && !isPagination(tableFirstOrg)) {
+                orgName = tableFirstOrg;
+            } else if (h3Text.includes('Employees of')) {
+                orgName = h3Text.replace('Employees of', '').split('|')[0].trim();
+            } else if (h3Text && !isPagination(h3Text)) {
+                orgName = h3Text.split('|')[0].trim();
+            } else {
+                // Fallback: Breadcrumbs
+                const crumbs = [...document.querySelectorAll('.breadcrumb li')].map(li => li.innerText.trim());
+                orgName = crumbs.find(c => !isPagination(c) && !['Dashboard', 'Home', 'Employees'].includes(c)) || 'Unknown Org';
+            }
+
+            // Final safety: Remove any pagination text if it somehow crept in
+            orgName = orgName.replace(/\d+\s+of\s+\d+/, '').replace(/^\|\s*/, '').trim();
+
             const userName = document.querySelector('.navbar-right .dropdown-toggle, #user-name, .user-profile-link')?.innerText.trim() || 'Portal User';
-            const totalRecords = document.querySelector('.pagination-summary, .pull-right strong')?.innerText.trim() || '---';
 
             return { orgId, orgName, userName, totalRecords, scanDate: new Date().toLocaleString() };
         }
@@ -71,6 +95,11 @@
             let pageNum = 1;
             let hasMore = true;
             while (hasMore) {
+                // Refresh metadata if it was incomplete
+                if (this.metadata.orgName === 'Unknown Org' || this.metadata.totalRecords === '---') {
+                    this.metadata = this.extractMetadata();
+                }
+
                 this.sendProgress(`Scanning Page ${pageNum}...`,
                     Math.min(95, (this.data.length / (this.data.length + 20)) * 100));
 
@@ -120,6 +149,7 @@
                 type: 'extraction_progress',
                 count: this.data.length,
                 message: statusMsg,
+                metadata: this.metadata,
                 progress: forceProgress ?? Math.min(98, (this.data.length / (this.data.length + 5)) * 100)
             });
         }

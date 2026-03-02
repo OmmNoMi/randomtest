@@ -138,6 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBar.style.width = `${message.progress}%`;
             statusText.innerText = message.message || `Scanned ${message.count} employees...`;
             buildBtn.innerHTML = `<span class="icon">⌛</span> Scanning... (${message.count})`;
+
+            if (message.metadata) {
+                showInfoBanner(message.metadata);
+            }
         } else if (message.type === 'extraction_complete') {
             statusCard.classList.remove('processing');
             allEmployees = message.data.map((emp, index) => ({ ...emp, id: index }));
