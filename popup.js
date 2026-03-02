@@ -289,13 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
         currentList.forEach(emp => {
             const item = document.createElement('div');
             item.className = 'list-item';
-            const isRemoved = removedIds.has(emp.id);
+            const isRemoved = removedIds.has(emp.uniqueKey);
             if (isRemoved) item.style.opacity = '0.35';
 
             item.innerHTML = `
                 <div class="item-info">
                     <h5>${emp.firstName} ${emp.lastName}</h5>
-                    <p>${emp.type || 'Standard'} | ${emp.status} | ${emp.organization}</p>
+                    <p>${emp.position || 'Standard'} | ${emp.type || 'Full-time'} | ${emp.status}</p>
+                    <p class="org-name-hint">${emp.organization}</p>
                 </div>
                 <button class="remove-btn" title="${isRemoved ? 'Restore' : 'Exclude'}">
                     ${isRemoved ? '↺' : '×'}
@@ -304,12 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btn = item.querySelector('.remove-btn');
             btn.addEventListener('click', () => {
-                if (removedIds.has(emp.id)) {
-                    removedIds.delete(emp.id);
+                if (removedIds.has(emp.uniqueKey)) {
+                    removedIds.delete(emp.uniqueKey);
                     item.style.opacity = '1';
                     btn.innerHTML = '×';
                 } else {
-                    removedIds.add(emp.id);
+                    removedIds.add(emp.uniqueKey);
                     item.style.opacity = '0.35';
                     btn.innerHTML = '↺';
                 }
@@ -323,25 +324,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFilteredPool(ignoreManualRemovals = false) {
         return allEmployees.filter(emp => {
-            const matchesType = selectedTypes.size === 0 || selectedTypes.has(emp.type || 'Standard');
+            const matchesType = selectedTypes.size === 0 || selectedTypes.has(emp.type || 'Full-time');
             const isTerminated = (emp.status || '').toLowerCase().includes('terminated');
             const statusMatch = !excludeTerminatedToggle.checked || !isTerminated;
 
-            const isManualRemoved = !ignoreManualRemovals && removedIds.has(emp.id);
+            const isManualRemoved = !ignoreManualRemovals && removedIds.has(emp.uniqueKey);
             return matchesType && statusMatch && !isManualRemoved;
         });
     }
 
     function updatePoolCounts() {
         const pool = getFilteredPool();
-        poolCountText.innerText = `Showing ${pool.length} available`;
-        extractionSummary.innerText = `Ready to select from ${pool.length} employees.`;
-
-        // Final sanity check: if 18/24, maybe show why
         const total = allEmployees.length;
-        if (pool.length < total) {
-            const filteredOut = total - pool.length;
-            extractionSummary.innerText += ` (${filteredOut} filtered out)`;
+
+        if (poolCountText) poolCountText.innerText = `${pool.length} available`;
+
+        if (extractionSummary) {
+            extractionSummary.innerText = `Ready to select from ${pool.length} employees.`;
+            if (pool.length < total) {
+                const filteredOut = total - pool.length;
+                extractionSummary.innerText += ` (${filteredOut} filtered out)`;
+            }
         }
     }
 

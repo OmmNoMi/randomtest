@@ -50,16 +50,11 @@
                 // Step 1: Scan current page
                 const pageResults = this.parseTable();
 
-                // Deduplicate
-                pageResults.forEach(emp => {
-                    const exists = this.data.some(existing =>
-                        existing.firstName === emp.firstName &&
-                        existing.lastName === emp.lastName &&
-                        existing.dob === emp.dob &&
-                        existing.type === emp.type &&
-                        existing.status === emp.status
-                    );
-                    if (!exists) this.data.push(emp);
+                pageResults.forEach((emp, pageIndex) => {
+                    // We generate a unique ID based on values + position to allow "duplicates" if they exist on the page
+                    const uniqueKey = `${emp.firstName}-${emp.lastName}-${emp.dob}-${this.data.length + pageIndex}`;
+                    emp.uniqueKey = uniqueKey;
+                    this.data.push(emp);
                 });
 
                 this.sendProgress(`Read ${this.data.length} records. Checking for next page...`);
@@ -127,25 +122,28 @@
             const results = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                // The table has 8 columns: Org, First, Last, DOB, Phone, Position, Type, Status
-                if (cells.length >= 6) {
+                // Labb Columns: Org(0), First(1), Last(2), DOB(3), Phone(4), Position/Email(5), Type(6), Actions(7)
+                if (cells.length >= 7) {
                     const rowData = {
                         organization: cells[0]?.innerText.trim(),
                         firstName: cells[1]?.innerText.trim(),
                         lastName: cells[2]?.innerText.trim(),
                         dob: cells[3]?.innerText.trim(),
                         phone: cells[4]?.innerText.trim(),
-                        position: cells[5]?.innerText.trim(),
-                        type: cells[6]?.innerText.trim() || 'Standard',
-                        status: cells[cells.length - 1]?.innerText.trim() || 'Active'
+                        position: cells[5]?.innerText.trim() || 'Standard',
+                        type: cells[6]?.innerText.trim() || 'Full-time',
+                        status: 'Active'
                     };
 
-                    // Action buttons are also in a cell usually, let's filter them out of status
-                    if (rowData.status.includes('VIEW/UPDATE')) {
-                        // If status is in the same cell as actions, or column 6 was type
-                        // actually looking at screenshots, type/status are separate if available
-                        // We'll fallback to checking the row class or specific text
-                        rowData.status = row.classList.contains('terminated') ? 'Terminated' : 'Active';
+                    // Check for termination indicators
+                    const isTerminated = rowData.type.toUpperCase().includes('TERMINATED') ||
+                        row.classList.contains('terminated') ||
+                        row.innerText.toUpperCase().includes('TERMINATED');
+
+                    if (isTerminated) {
+                        rowData.status = 'Terminated';
+                        // Re-evaluate 'type' if it was carrying only the status
+                        if (rowData.type.toUpperCase() === 'TERMINATED') rowData.type = 'Inactive';
                     }
 
                     results.push(rowData);

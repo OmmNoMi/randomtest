@@ -56,35 +56,24 @@
             </div>
 
             <div id="selection-view" class="hidden">
-                <div class="status-card success">
-                    <p id="extraction-summary">Ready to select from 0 employees.</p>
-                </div>
-
-                <div class="filter-controls">
-                    <div class="controls-group">
-                        <label>Exclude Terminated:</label>
-                        <div class="toggle-group">
-                            <input type="checkbox" id="exclude-terminated-toggle" checked>
-                            <span class="hint">Recommended</span>
-                        </div>
-                    </div>
-                    <div class="controls-group">
-                        <label>Employment Type:</label>
-                        <div id="type-multi-select" class="multi-select">
-                            <div class="select-box">All Types (Default)</div>
-                            <div id="type-options" class="options-container hidden">
-                                <!-- Dynamic options here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="list-section">
                     <div class="section-header">
-                        <h3>Employee Master Pool</h3>
-                        <span id="pool-count">Showing 0 available</span>
+                        <div class="header-main">
+                            <h3>Employee Master Pool</h3>
+                            <div class="inline-filters">
+                                <label class="toggle-item">
+                                    <input type="checkbox" id="exclude-terminated-toggle" checked>
+                                    <span>Exclude Terminated</span>
+                                </label>
+                                <div id="type-multi-select" class="multi-select">
+                                    <div class="select-box">All Types</div>
+                                    <div id="type-options" class="options-container hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <span id="pool-count" class="badge">24 available</span>
                     </div>
-                    <p class="section-hint">× Exclude individuals from this pool before picking random.</p>
+                    <p class="section-hint">× Exclude individuals by clicking the red icon before picking random.</p>
                     <div id="main-employee-list" class="styled-list">
                         <!-- List items here -->
                     </div>
