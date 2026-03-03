@@ -244,8 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FILTER SETUP ---
     function setupFilters() {
-        const statuses = [...new Set(allEmployees.map(e => e.status || 'Active'))].sort();
-        const types = [...new Set(allEmployees.map(e => e.type || 'Standard'))].sort();
+        const statuses = [...new Set(allEmployees.map(e => (e.status || 'Active').trim()))].sort();
+        const types = [...new Set(allEmployees.map(e => (e.type || 'Standard').trim()))].sort();
 
         // If this is a fresh load (no saved filters) and selection is empty
         if (!filtersLoaded && selectedTypes.size === 0) {
@@ -266,16 +266,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="checkbox" ${activeSet.has(opt) ? 'checked' : ''} data-val="${opt}">
                 <span class="check-label">${opt}</span>
             `;
-            label.querySelector('input').addEventListener('change', (e) => {
-                if (e.target.checked) activeSet.add(opt);
-                else activeSet.delete(opt);
-                saveFilters();
-                updateFilterCountBadge();
-                renderUI();
-            });
             container.appendChild(label);
         });
     }
+
+    // Delegated listener for filter groups
+    [statusFilterOptions, typeFilterOptions].forEach(container => {
+        container.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const val = e.target.getAttribute('data-val');
+                const isStatus = container.id.includes('status');
+                const targetSet = isStatus ? selectedStatuses : selectedTypes;
+
+                if (e.target.checked) targetSet.add(val);
+                else targetSet.delete(val);
+
+                saveFilters();
+                updateFilterCountBadge();
+                renderUI();
+            }
+        });
+    });
 
     function saveFilters() {
         chrome.storage.local.set({
@@ -333,16 +344,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function getFilteredList() {
+        // Create normalized sets for fast case-insensitive lookup
+        const normStatuses = new Set([...selectedStatuses].map(s => s.toLowerCase().trim()));
+        const normTypes = new Set([...selectedTypes].map(t => t.toLowerCase().trim()));
+
         return allEmployees.filter(emp => {
             // Text Search
             const name = `${emp.firstName} ${emp.lastName}`.toLowerCase();
             if (searchQuery && !name.includes(searchQuery)) return false;
 
-            // Status Filter
-            if (!selectedStatuses.has(emp.status)) return false;
+            // Status Filter (Normalized)
+            const eStatus = (emp.status || 'Active').toLowerCase().trim();
+            if (!normStatuses.has(eStatus)) return false;
 
-            // Type Filter
-            if (!selectedTypes.has(emp.type)) return false;
+            // Type Filter (Normalized)
+            const eType = (emp.type || 'Standard').toLowerCase().trim();
+            if (!normTypes.has(eType)) return false;
 
             return true;
         });
@@ -352,11 +369,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = getFilteredList();
         const availableCount = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey)).length;
 
-        // Update Labels
-        visibleCountLabel.innerText = filtered.length;
-        selectedCountLabel.innerText = availableCount;
-        footerSelectedCount.innerText = availableCount;
-        totalCountLabel.innerText = allEmployees.length;
+        // Update Labels with defensive checks
+        if (visibleCountLabel) visibleCountLabel.innerText = filtered.length;
+        if (selectedCountLabel) selectedCountLabel.innerText = availableCount;
+        if (footerSelectedCount) footerSelectedCount.innerText = availableCount;
+        if (totalCountLabel) totalCountLabel.innerText = allEmployees.length;
 
         renderEmployees(filtered);
     }
