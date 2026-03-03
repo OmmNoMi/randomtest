@@ -532,12 +532,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!meta) return;
         const orgNameEl = document.getElementById('display-org-name');
         const orgIdEl = document.getElementById('display-org-id');
-        const totalRecordsEl = document.getElementById('display-total-records');
         const userEl = document.getElementById('display-user');
 
         if (orgNameEl) orgNameEl.innerText = meta.orgName || '---';
         if (orgIdEl) orgIdEl.innerText = meta.orgId || '---';
-        if (totalRecordsEl) totalRecordsEl.innerText = meta.totalRecords || '---';
         if (userEl) userEl.innerText = meta.userName || '---';
     }
 

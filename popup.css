@@ -449,9 +449,10 @@ body {
 }
 
 .count-sep {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 800;
     color: var(--text-muted);
-    opacity: 0.5;
+    opacity: 0.8;
 }
 
 .count-total {
@@ -487,14 +488,20 @@ body {
 
 /* TOOLBAR ACTIONS */
 .toolbar-actions {
-    padding: 6px 16px 8px;
+    padding: 6px 16px 10px;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 10px;
     border-top: 1px solid var(--border-color);
     background: var(--bg-toolbar);
+}
+
+.secondary-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
 }
 
 .workspace-content {
@@ -518,6 +525,16 @@ body {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        gap: 20px;
+    }
+
+    .secondary-controls {
+        width: auto;
+        order: 2;
+    }
+
+    .search-box {
+        order: 1;
     }
 }
 
@@ -528,9 +545,8 @@ body {
 .filter-group {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     gap: 8px;
-    flex: 1;
 }
 
 .search-box {
