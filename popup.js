@@ -309,27 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- DROPDOWN CONTROL ---
-    filterMenu.addEventListener('click', (e) => {
-        const target = e.target;
-        if (target.classList.contains('text-link')) {
-            const group = target.getAttribute('data-group');
-            const action = target.getAttribute('data-action');
-            const masterSet = group === 'status' ? selectedStatuses : selectedTypes;
-            const container = group === 'status' ? statusFilterOptions : typeFilterOptions;
-
-            if (action === 'all') {
-                const inputs = container.querySelectorAll('input[type="checkbox"]');
-                inputs.forEach(input => masterSet.add(input.getAttribute('data-val')));
-            } else {
-                masterSet.clear();
-            }
-
-            saveFilters();
-            setupFilters();
-            renderUI();
-        }
-    });
-
     resetFiltersBtn.addEventListener('click', () => {
         selectedStatuses = new Set(['Active']);
         selectedTypes = new Set();

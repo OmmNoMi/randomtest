@@ -588,19 +588,10 @@ body {
     gap: 2px;
 }
 
-.menu-header {
+.menu-footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 8px 6px 8px;
-}
-
-.menu-toggles {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.6rem;
-    color: var(--text-muted);
+    justify-content: center;
+    padding-top: 8px;
 }
 
 .text-link {
@@ -608,7 +599,7 @@ body {
     border: none;
     padding: 0;
     color: var(--primary);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
@@ -618,10 +609,6 @@ body {
 .text-link:hover {
     opacity: 0.7;
     text-decoration: underline;
-}
-
-.sep {
-    opacity: 0.3;
 }
 
 .check-item {
