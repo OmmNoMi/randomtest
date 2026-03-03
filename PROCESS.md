@@ -30,6 +30,7 @@ This document serves as a comprehensive log of the development lifecycle, archit
     - Added "Not Specified" category for employees with blank employment types.
     - Implemented case-insensitive, trimmed matching for filter reliability.
     - Added "Reset to Defaults" option in the filter menu.
+- **Productivity**: Added "/" keyboard shortcut to focus and highlight search.
 - **Code Stability**: Fixed TypeErrors and implemented event delegation for interactive elements.
 - **Export Improvements**: Added UTF-8 BOM to CSVs for better Excel compatibility and included employment type in exports.
 - **Streamlined Actions**: Moved "Export All" and "Export Selected" buttons to the main footer alongside the Randomize action for better user flow.

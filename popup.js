@@ -331,6 +331,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- GLOBAL KEYBOARD SHORTCUTS ---
+    document.addEventListener('keydown', (e) => {
+        // "/" shortcut to focus search
+        const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+        if (e.key === '/' && !isTyping) {
+            e.preventDefault();
+            searchInput.focus();
+            if (searchInput.value.length > 0) {
+                searchInput.select(); // Highlight existing text
+            }
+        }
+    });
+
     // --- VIEW LOGIC ---
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase();

@@ -22,6 +22,10 @@ A professional-grade Chrome extension designed for high-accuracy employee data e
 3. **Configure (Selection)**: Use the inclusion toggles (Plus/X) or **Batch Actions** (All/None) to finalize your pool.
 4. **Export & Randomize**: Download your tailored pool as a CSV or click **"Run Selection"** to pick your candidates.
 
+## ⌨️ Power User Tip
+
+- **Quick Search**: Press **`/`** anywhere in the popup to instantly focus the search bar. If search text already exists, it will be automatically highlighted for quick overwriting.
+
 ## 🛠️ Installation
 
 1. Download or clone this repository to your local machine.
