@@ -30,8 +30,15 @@ This document serves as a comprehensive log of the development lifecycle, archit
     - Added "Not Specified" category for employees with blank employment types.
     - Implemented case-insensitive, trimmed matching for filter reliability.
     - Added "Reset to Defaults" option in the filter menu.
-- **Productivity**: Added "/" keyboard shortcut to focus and highlight search.
-- **Code Stability**: Fixed TypeErrors and implemented event delegation for interactive elements.
+- **Productivity & UI Refinements**:
+    - Added "/" keyboard shortcut to focus and highlight search.
+    - Added **Inclusion State Filters** to toggle visibility of "Selected" vs "Excluded" employees.
+    - Optimized **Mobile Layout** with a stacked toolbar and full-width search bar.
+    - Improved **Header Density**: Switched Rescan button to a compact icon and removed redundant "Total Members" statistics.
+    - Enhanced **Light Theme** with a more balanced color palette for better daylight readability.
+- **Code Stability & Safety**:
+    - Fixed multiple TypeErrors with comprehensive null-checking in the UI renderer.
+    - Implemented **Global Script Guards** in `content.js` to prevent double-injection of event listeners.
 - **Export Improvements**: Added UTF-8 BOM to CSVs for better Excel compatibility and included employment type in exports.
 - **Streamlined Actions**: Moved "Export All" and "Export Selected" buttons to the main footer alongside the Randomize action for better user flow.
 
@@ -57,4 +64,4 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - [ ] **Export Formats**: Add direct PDF export functionality for compliance record-keeping.
 
 ---
-*Last Updated: March 2026*
+*Last Updated: March 3, 2026*

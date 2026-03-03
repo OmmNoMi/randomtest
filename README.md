@@ -8,10 +8,9 @@ A professional-grade Chrome extension designed for high-accuracy employee data e
 ## ✨ Premium Features (v2.0)
 
 - **Aesthetic Redesign**: Modern "Premium Dark" glassmorphism theme with a dedicated Light Mode toggle.
-- **Decoupled Architecture**: Fundamentally separated **View Filters** (who you see) from **Selection Pool** (who is picked).
-- **Unified Filter Menu**: Space-saving status and employment type filters consolidated into a single dropdown.
-- **Dynamic Search**: Instantly find specific employees without affecting the overall selection pool.
-- **Batch Visibility Actions**: Rapidly include or exclude everyone matching your current filtered view (e.g., "Exclude all visible Contract employees").
+- **Inclusion State Filters**: Isolate "Selected" vs "Unselected" pools with a single click to review your targets before randomization.
+- **Mobile Layout Optimization**: Intelligent toolbar stacking ensures a full-width search bar and accessible controls even on narrow mobile displays.
+- **Streamlined Header**: Updated with improved light theme colors, a compact "Rescan" icon, and a cleaner context bar that removes redundant statistics.
 - **Smart Terminated Handling**: Automatically identifies and excludes terminated individuals by default, while allowing you to toggle them back if needed.
 - **Excel-Ready Export**: High-compatibility CSV engine with UTF-8 BOM encoding for seamless Microsoft Excel and Google Sheets integration.
 
