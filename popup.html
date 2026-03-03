@@ -4,128 +4,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Testing</title>
+    <title>Random Testing v2.0</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 
-<body>
-    <div class="container">
-        <header>
-            <div class="header-top">
-                <div class="logo">RANDOM<span>TESTING</span></div>
+<body class="dark-mode">
+    <div id="root" class="min-h-screen">
+        <div class="max-w-container mx-auto space-y-6">
+
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-branding">
+                    <div class="logo-box">
+                        <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1>RANDOM<span>TESTING</span></h1>
+                        <p class="version">Selection Engine v2.0</p>
+                    </div>
+                </div>
+
                 <div class="header-actions">
-                    <button id="rescan-btn" class="icon-btn" title="Clear & Rescan Now">
-                        <span>🔄</span>
+                    <button id="theme-toggle" class="icon-btn-border" title="Toggle Theme">
+                        <span class="theme-icon mode-dark">☀️</span>
+                        <span class="theme-icon mode-light hidden">🌙</span>
                     </button>
-                    <button id="expand-btn" class="icon-btn" title="Open in Full View">
+                    <button id="rescan-btn" class="icon-btn-border text-label" title="Clear & Rescan Now">
+                        <svg class="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+                        </svg>
+                        <span class="btn-text">Rescan Data</span>
+                    </button>
+                    <button id="expand-btn" class="icon-btn-border" title="Open in Full View">
                         <span>↗</span>
                     </button>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <div id="info-banner" class="info-banner">
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Organization</span>
-                    <span id="display-org-name" class="value">Detecting...</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Total Members</span>
-                    <span id="display-total-records" class="value">---</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Org ID</span>
-                    <span id="display-org-id" class="value">---</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">User</span>
-                    <span id="display-user" class="value">---</span>
-                </div>
-            </div>
-        </div>
-
-        <main>
-            <div id="setup-view">
-                <div class="status-card">
-                    <p id="status-text">Ready to scan and extract list.</p>
-                    <div class="progress-bar-container">
-                        <div id="progress-bar" class="progress-bar"></div>
+            <!-- CONTEXT BAR (Organization Info) -->
+            <div id="info-banner" class="context-grid">
+                <div class="context-card bg-accent-blue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="10" width="20" height="10" rx="2" ry="2" />
+                        <path d="M7 10V5a2 2 0 012-2h6a2 2 0 012 2v5" />
+                    </svg>
+                    <div class="card-content">
+                        <span class="label">Organization</span>
+                        <span id="display-org-name" class="value">Detecting...</span>
                     </div>
                 </div>
-
-                <button id="build-btn" class="primary-btn">
-                    <span class="icon">🔍</span>
-                    Build Master List
-                </button>
+                <div class="context-card bg-accent-purple">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18" />
+                    </svg>
+                    <div class="card-content">
+                        <span class="label">Org ID</span>
+                        <span id="display-org-id" class="value">---</span>
+                    </div>
+                </div>
+                <div class="context-card bg-accent-indigo">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                    <div class="card-content">
+                        <span class="label">Total Members</span>
+                        <span id="display-total-records" class="value">---</span>
+                    </div>
+                </div>
+                <div class="context-card bg-accent-emerald">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <div class="card-content">
+                        <span class="label">Current User</span>
+                        <span id="display-user" class="value">---</span>
+                    </div>
+                </div>
             </div>
 
-            <div id="selection-view" class="hidden">
-                <div class="list-section">
-                    <div class="section-header">
-                        <div class="header-main">
-                            <h3>Employee Master Pool</h3>
-                            <div class="inline-filters">
-                                <label class="toggle-item">
-                                    <input type="checkbox" id="exclude-terminated-toggle" checked>
-                                    <span>Exclude Terminated</span>
-                                </label>
-                                <div id="type-multi-select" class="multi-select">
-                                    <div class="select-box">All Types</div>
-                                    <div id="type-options" class="options-container hidden"></div>
+            <!-- MAIN WORKSPACE -->
+            <main class="main-workspace">
+
+                <!-- SETUP VIEW -->
+                <div id="setup-view" class="setup-container">
+                    <div class="status-card">
+                        <p id="status-text">Ready to scan and extract list.</p>
+                        <div class="progress-bar-container">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+                    </div>
+                    <button id="build-btn" class="primary-btn-glow">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="M21 21l-4.35-4.35" />
+                        </svg>
+                        Build Master List
+                    </button>
+                </div>
+
+                <!-- SELECTION VIEW -->
+                <div id="selection-view" class="workspace-content hidden">
+
+                    <!-- Integrated Header & Control Toolbar -->
+                    <div class="integrated-toolbar">
+
+                        <!-- Top Row: Title & Selection Summary -->
+                        <div class="toolbar-header">
+                            <div class="title-group">
+                                <h2>Employee Master Pool</h2>
+                                <p class="hint">Filter view to target groups, then adjust selection.</p>
+                            </div>
+
+                            <div id="selection-summary" class="selection-badge">
+                                <div class="badge-info">
+                                    <span class="badge-label">Total Selected</span>
+                                    <div class="badge-numbers">
+                                        <span id="selected-count" class="count-now">0</span>
+                                        <span class="count-sep">/</span>
+                                        <span id="total-count-label" class="count-total">0</span>
+                                    </div>
                                 </div>
+                                <div class="status-dot"></div>
                             </div>
                         </div>
-                        <span id="pool-count" class="badge">24 available</span>
+
+                        <!-- Action Toolbar Row -->
+                        <div class="toolbar-actions">
+
+                            <!-- Search & Filter Group -->
+                            <div class="filter-group">
+                                <span class="group-label">Find Employees</span>
+                                <div class="search-box">
+                                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" />
+                                    </svg>
+                                    <input type="text" id="employee-search" placeholder="Search name...">
+                                </div>
+
+                                <div class="dropdown-wrapper">
+                                    <button id="filter-dropdown-btn" class="dropdown-btn">
+                                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                        </svg>
+                                        Filters
+                                        <span id="active-filter-count" class="count-blob">0</span>
+                                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </button>
+
+                                    <div id="filter-menu" class="dropdown-menu hidden">
+                                        <div class="menu-section">
+                                            <p class="menu-label">Status</p>
+                                            <div id="status-filter-options" class="checkbox-group">
+                                                <!-- Dynamic Status Options -->
+                                            </div>
+                                        </div>
+                                        <div class="menu-divider"></div>
+                                        <div class="menu-section">
+                                            <p class="menu-label">Employment Type</p>
+                                            <div id="type-filter-options" class="checkbox-group">
+                                                <!-- Dynamic Type Options -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Batch Action Group -->
+                            <div class="batch-group">
+                                <span class="group-label">Select Visible</span>
+                                <div class="btn-group">
+                                    <button id="include-visible-btn" class="batch-btn success"
+                                        title="Include all visible">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 11 12 14 22 4" />
+                                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                                        </svg>
+                                        <span>All</span>
+                                    </button>
+                                    <button id="exclude-visible-btn" class="batch-btn danger"
+                                        title="Exclude all visible">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        </svg>
+                                        <span>None</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="viewport-banner" class="viewport-banner">
+                            Currently viewing <strong id="visible-count">0</strong> employees. Batch actions apply only
+                            to this filtered list.
+                        </div>
                     </div>
-                    <p class="section-hint">× Exclude individuals by clicking the red icon before picking random.</p>
-                    <div id="main-employee-list" class="styled-list">
+
+                    <!-- Employee List -->
+                    <div id="main-employee-list" class="employee-list-container custom-scrollbar">
                         <!-- List items here -->
+                        <div class="empty-state hidden">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                            </svg>
+                            <p class="empty-title">No employees found</p>
+                            <p class="empty-hint">Try adjusting your search or filters.</p>
+                        </div>
+                    </div>
+
+                    <!-- WORKSPACE FOOTER -->
+                    <div class="workspace-footer">
+                        <div class="export-actions">
+                            <button id="download-all-csv" class="footer-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Export All
+                            </button>
+                            <button id="download-pool-csv" class="footer-btn accent">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Export Selected (<span id="footer-selected-count">0</span>)
+                            </button>
+                        </div>
+
+                        <div class="selection-action">
+                            <div class="count-input-wrapper">
+                                <input type="number" id="random-count" value="1" min="1">
+                            </div>
+                            <button id="select-random-btn" class="run-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="16 3 21 3 21 8" />
+                                    <line x1="4" y1="20" x2="21" y2="3" />
+                                    <polyline points="21 16 21 21 16 21" />
+                                    <line x1="15" y1="15" x2="21" y2="21" />
+                                    <line x1="4" y1="4" x2="9" y2="9" />
+                                </svg>
+                                Run Selection
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="action-footer">
-                    <div class="controls-row">
-                        <div class="controls-group">
-                            <label for="random-count">Pick Count:</label>
-                            <input type="number" id="random-count" value="1" min="1" class="modern-input">
+                <!-- WINNER VIEW -->
+                <div id="winner-view" class="workspace-content hidden">
+                    <div class="winner-congratulations">
+                        <div class="status-badge-success">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Selection Complete
                         </div>
-                        <button id="select-random-btn" class="accent-btn">
-                            <span class="icon">🎲</span> Run Selection
+                        <h3>Selected Employees</h3>
+                    </div>
+
+                    <div id="winner-list" class="winner-grid custom-scrollbar">
+                        <!-- Winner cards here -->
+                    </div>
+
+                    <div class="winner-footer">
+                        <button id="download-winners-csv" class="run-btn">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            Export Results (CSV)
                         </button>
-                    </div>
-
-                    <div class="secondary-actions">
-                        <div class="csv-actions">
-                            <button id="download-all-csv" class="secondary-btn">Download Full Master Pool (All
-                                records)</button>
-                            <button id="download-pool-csv" class="secondary-btn">Download Filtered Pool (Current
-                                view)</button>
-                        </div>
-                        <button id="clear-scan-btn" class="danger-link-btn">Clear Results & Scan New</button>
+                        <button id="reset-btn" class="footer-btn">Start New Selection</button>
                     </div>
                 </div>
-            </div>
 
-            <div id="winner-view" class="hidden">
-                <div class="status-card success">
-                    <p>Random Selection Complete</p>
-                </div>
-                <h3>Selected Employees:</h3>
-                <div id="winner-list"></div>
+            </main>
 
-                <div class="winner-actions">
-                    <button id="download-winners-csv" class="accent-btn">
-                        <span class="icon">📥</span> Export Selected (CSV)
-                    </button>
-                    <button id="reset-btn" class="secondary-btn">Start New Selection</button>
-                </div>
-            </div>
-        </main>
+            <footer class="app-footer">
+                <p>OmmNoMi Random Selection Utility • v2.0</p>
+            </footer>
 
-        <footer>
-            <p>Premium Testing Utility • Astra Engine</p>
-        </footer>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

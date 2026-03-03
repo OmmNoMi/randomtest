@@ -1,42 +1,40 @@
-# RandomTesting Chrome Extension
+# RandomTesting v2.0 (Premium Selection Engine)
 
-A premium, high-performance Chrome extension designed for automated employee extraction and random selection from LabbReport portals. Built with a focus on speed, aesthetic UI, and robust data integrity.
+A professional-grade Chrome extension designed for high-accuracy employee data extraction and randomized selection from the LabbReport platform.
 
-## ✨ Features
+![Version 2.0](https://img.shields.io/badge/version-2.0-indigo.svg?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
 
-- **Automated Extraction**: Scans LabbReport employee tables and captures all data points including First Name, Last Name, DOB, Phone, Position, and Employment Type.
-- **Smart Filtering**: 
-    - **Exclude Terminated**: Automatically identifies and filters out terminated employees (enabled by default).
-    - **Multi-Select Employment Type**: Filter the pool by Full-time, Part-time, or other custom categories.
-- **Master Pool Management**: 
-    - View all extracted records in a modern, responsive list.
-    - Manually exclude specific individuals before generating a random selection.
-- **Random Selection Engine**: Generate a truly random subset of employees based on your configured count.
-- **Comprehensive CSV Exports**:
-    - **Full Master Pool**: Export every record discovered during the scan.
-    - **Filtered Pool**: Export only the subset currently visible in your filtered view.
-- **Premium UI/UX**: Glassmorphism design system with smooth animations and responsive layout for both standard popup and full-tab views.
+## ✨ Premium Features (v2.0)
 
-## 🚀 Installation
+- **Aesthetic Redesign**: Modern "Premium Dark" glassmorphism theme with a dedicated Light Mode toggle.
+- **Decoupled Architecture**: Fundamentally separated **View Filters** (who you see) from **Selection Pool** (who is picked).
+- **Unified Filter Menu**: Space-saving status and employment type filters consolidated into a single dropdown.
+- **Dynamic Search**: Instantly find specific employees without affecting the overall selection pool.
+- **Batch Visibility Actions**: Rapidly include or exclude everyone matching your current filtered view (e.g., "Exclude all visible Contract employees").
+- **Smart Terminated Handling**: Automatically identifies and excludes terminated individuals by default, while allowing you to toggle them back if needed.
+- **Excel-Ready Export**: High-compatibility CSV engine with UTF-8 BOM encoding for seamless Microsoft Excel and Google Sheets integration.
 
-1. Clone or download this repository.
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable **Developer mode** in the top right corner.
-4. Click **Load unpacked** and select the extension's root directory.
+## 🚀 4-Step Professional Workflow
 
-## 📝 Usage Workflow
+1. **Extract**: Click **"Build Master List"** to initiate an automated scan of all pages on the active LabbReport employee directory.
+2. **Refine (View)**: Use the **Search bar** or **Filters menu** to drill down into specific departments, statuses, or names.
+3. **Configure (Selection)**: Use the inclusion toggles (Plus/X) or **Batch Actions** (All/None) to finalize your pool.
+4. **Export & Randomize**: Download your tailored pool as a CSV or click **"Run Selection"** to pick your candidates.
 
-1. **Scan**: Navigate to a LabbReport employee list and click **Build Master List**. The extension will automatically handle pagination and data extraction.
-2. **Refine**: Use the **Exclude Terminated** toggle or **Employment Type** filter to narrow down your pool.
-3. **Manual Exclusion**: Click the red `×` icon on any employee row to manually remove them from the selection pool.
-4. **Generate**: Enter your desired count and click **Run Selection**.
-5. **Export**: Use the CSV buttons at the bottom to download your results for record-keeping.
+## 🛠️ Installation
 
-## 🛠️ Technical Overview
+1. Download or clone this repository to your local machine.
+2. Open Chrome and navigate to `chrome://extensions`.
+3. Enable **"Developer mode"** in the top-right corner.
+4. Click **"Load unpacked"** and select the project folder.
+5. Pin the extension for quick access.
 
-- **Core Engine**: Vanilla JavaScript with chrome-native storage for persistence.
-- **Styling**: Modern CSS with custom scrollbars, HSL color palettes, and container queries for responsiveness.
-- **Content Script**: Robust DOM observer that captures LabbReport table data without interfering with site performance.
+## 🏗️ Technical Stack
+
+- **LabbScanner Engine**: Custom-built JavaScript parser optimized for LabbReport's DOM structure.
+- **State Management**: Distributed `chrome.storage.local` persistence for maintaining scan results across browser sessions.
+- **UI Architecture**: Vanilla CSS with HSL design tokens, responsive Grid/Flex layouts, and SVG icon integration.
 
 ---
-Developed by **OmmNoMi**.
+*Maintained by OmmNoMi • 2026*

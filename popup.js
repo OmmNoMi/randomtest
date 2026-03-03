@@ -1,224 +1,167 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements
+    // --- UI ELEMENTS ---
     const buildBtn = document.getElementById('build-btn');
     const selectRandomBtn = document.getElementById('select-random-btn');
     const resetBtn = document.getElementById('reset-btn');
     const downloadAllCsvBtn = document.getElementById('download-all-csv');
+    const downloadPoolCsvBtn = document.getElementById('download-pool-csv');
     const downloadWinnersCsvBtn = document.getElementById('download-winners-csv');
-
+    const rescanBtn = document.getElementById('rescan-btn');
+    const themeToggle = document.getElementById('theme-toggle');
     const expandBtn = document.getElementById('expand-btn');
+
     const setupView = document.getElementById('setup-view');
     const selectionView = document.getElementById('selection-view');
     const winnerView = document.getElementById('winner-view');
-    const rescanBtn = document.getElementById('rescan-btn');
-    const statusCard = setupView.querySelector('.status-card');
-
-    if (rescanBtn) {
-        rescanBtn.addEventListener('click', async () => {
-            // Clear selection results but NOT metadata
-            await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
-            allEmployees = [];
-            removedIds = new Set();
-            selectedWinners = [];
-
-            // Visual reset
-            setupView.classList.remove('hidden');
-            selectionView.classList.add('hidden');
-            winnerView.classList.add('hidden');
-
-            statusText.innerText = 'Ready to scan and extract list.';
-            progressBar.style.width = '0%';
-            statusCard.classList.remove('processing');
-            buildBtn.disabled = false;
-            buildBtn.innerHTML = '<span class="icon">🔍</span> Build Master List';
-
-            // Trigger scan automatically
-            buildBtn.click();
-        });
-    }
-
-    // Hide expand button if we're already in a full tab
-    if (window.innerWidth > 500) {
-        expandBtn.style.display = 'none';
-        document.body.style.width = '100vw';
-        document.body.style.margin = '0';
-    }
-
-    expandBtn.addEventListener('click', () => {
-        chrome.tabs.create({ url: chrome.runtime.getURL('popup.html') });
-    });
-
-    const infoBanner = document.getElementById('info-banner');
     const statusText = document.getElementById('status-text');
     const progressBar = document.getElementById('progress-bar');
-    const displayOrgName = document.getElementById('display-org-name');
-    const displayTotalRecords = document.getElementById('display-total-records');
-    const displayOrgId = document.getElementById('display-org-id');
-    const displayUser = document.getElementById('display-user');
-
-    const extractionSummary = document.getElementById('extraction-summary');
     const mainEmployeeList = document.getElementById('main-employee-list');
-    const poolCountText = document.getElementById('pool-count');
-    const countInput = document.getElementById('random-count');
     const winnerList = document.getElementById('winner-list');
 
-    // State
+    const searchInput = document.getElementById('employee-search');
+    const filterDropdownBtn = document.getElementById('filter-dropdown-btn');
+    const filterMenu = document.getElementById('filter-menu');
+    const statusFilterOptions = document.getElementById('status-filter-options');
+    const typeFilterOptions = document.getElementById('type-filter-options');
+    const activeFilterCount = document.getElementById('active-filter-count');
+
+    const includeVisibleBtn = document.getElementById('include-visible-btn');
+    const excludeVisibleBtn = document.getElementById('exclude-visible-btn');
+
+    const selectedCountLabel = document.getElementById('selected-count');
+    const totalCountLabel = document.getElementById('total-count-label');
+    const footerSelectedCount = document.getElementById('footer-selected-count');
+    const visibleCountLabel = document.getElementById('visible-count');
+    const viewportBanner = document.getElementById('viewport-banner');
+
+    const randomCountInput = document.getElementById('random-count');
+
+    // --- STATE ---
     let allEmployees = [];
     let selectedWinners = [];
-    let removedIds = new Set();
-    const selectedTypes = new Set();
+    let excludedIds = new Set();
+    let selectedStatuses = new Set(['Active']); // Exclude Terminated by default
+    let selectedTypes = new Set(); // Empty means all allowed initially
+    let searchQuery = '';
+    let isDarkMode = true;
 
-    // Multi-select logic
-    const multiSelect = document.getElementById('type-multi-select');
-    const typeOptions = document.getElementById('type-options');
-    const selectBox = multiSelect ? multiSelect.querySelector('.select-box') : null;
-
-    function showInfoBanner(meta) {
-        if (!meta) return;
-
-        const updateField = (id, val) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.innerText = val || '---';
-            if (!val || val === '---' || val.includes('Detecting') || val.includes('Searching')) {
-                el.classList.add('detecting');
-            } else {
-                el.classList.remove('detecting');
-            }
-        };
-
-        updateField('display-org-name', meta.orgName);
-        updateField('display-total-records', meta.totalRecords);
-        updateField('display-org-id', meta.orgId);
-        updateField('display-user', meta.userName);
-    }
-
+    // --- INITIALIZATION ---
     async function init() {
-        // 1. Check for active scan state or completed results in storage
-        const storage = await chrome.storage.local.get(['rt_scan_state', 'lastScan', 'allEmployees', 'removedIds']);
+        // Load theme
+        const themeStore = await chrome.storage.local.get(['theme']);
+        if (themeStore.theme === 'light') {
+            document.body.classList.remove('dark-mode');
+            document.body.classList.add('light-mode');
+            isDarkMode = false;
+            updateThemeUI();
+        }
+
+        // Load data
+        const storage = await chrome.storage.local.get(['allEmployees', 'removedIds', 'lastScan', 'rt_scan_state']);
 
         if (storage.allEmployees && storage.allEmployees.length > 0) {
-            console.log('Popup: Loading completed scan results from storage.');
             allEmployees = storage.allEmployees;
-            removedIds = new Set(storage.removedIds || []);
-            if (storage.lastScan) showInfoBanner(storage.lastScan);
+            excludedIds = new Set(storage.removedIds || []);
 
-            populateTypeFilters();
-            renderIntegratedPool();
-            updatePoolCounts();
+            // If we have data, we might need to sync the "Terminated" exclusion if not already explicitly set
+            // But usually we just follow the state.
+
+            showInfoBanner(storage.lastScan);
+            setupFilters();
+            renderUI();
+
             setupView.classList.add('hidden');
             selectionView.classList.remove('hidden');
         } else if (storage.rt_scan_state && storage.rt_scan_state.isScanning) {
-            console.log('Popup: Resuming view from active scan state.');
             showInfoBanner(storage.rt_scan_state.metadata);
-            statusCard.classList.add('processing');
-            buildBtn.disabled = true;
-            buildBtn.innerHTML = '<span class="icon">⌛</span> Scanning...';
-            statusText.innerText = 'Extraction in progress...';
+            setScanningUI(true);
         } else if (storage.lastScan) {
             showInfoBanner(storage.lastScan);
         }
 
-        // 2. Start heartbeat for metadata detection
         autoDetectMetadata();
     }
 
+    // --- THEME LOGIC ---
+    themeToggle.addEventListener('click', () => {
+        isDarkMode = !isDarkMode;
+        if (isDarkMode) {
+            document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
+            chrome.storage.local.set({ theme: 'dark' });
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.body.classList.add('light-mode');
+            chrome.storage.local.set({ theme: 'light' });
+        }
+        updateThemeUI();
+    });
+
+    function updateThemeUI() {
+        const modeDark = themeToggle.querySelector('.mode-dark');
+        const modeLight = themeToggle.querySelector('.mode-light');
+        if (isDarkMode) {
+            modeDark.classList.remove('hidden');
+            modeLight.classList.add('hidden');
+        } else {
+            modeDark.classList.add('hidden');
+            modeLight.classList.remove('hidden');
+        }
+    }
+
+    // --- NAVIGATION ---
+    expandBtn.addEventListener('click', () => {
+        chrome.tabs.create({ url: chrome.runtime.getURL('popup.html') });
+    });
+
+    if (window.innerWidth > 500) {
+        expandBtn.classList.add('hidden');
+    }
+
+    // --- SCAN LOGIC ---
     async function autoDetectMetadata() {
         const tab = await getLabbTab();
         if (tab) {
             chrome.tabs.sendMessage(tab.id, { action: 'GET_METADATA' }, async (response) => {
                 if (chrome.runtime.lastError || !response) {
-                    // Try to inject if script is missing
                     await injectScript(tab.id);
-                    // Use a slightly longer timeout after injection attempt
                     setTimeout(autoDetectMetadata, 2000);
                 } else if (response.metadata) {
                     showInfoBanner(response.metadata);
                 }
             });
         } else {
-            // Provide feedback that we're still looking
-            showInfoBanner({
-                orgName: 'Searching for Labb Page...',
-                totalRecords: '---',
-                orgId: '---',
-                userName: '---'
-            });
+            showInfoBanner({ orgName: 'Searching...', orgId: '---', totalRecords: '---', userName: '---' });
             setTimeout(autoDetectMetadata, 3000);
         }
     }
 
-    async function injectScript(tabId) {
-        try {
-            await chrome.scripting.executeScript({
-                target: { tabId },
-                files: ['content.js']
-            });
-            console.log('Popup: Successfully injected content script.');
-        } catch (e) {
-            console.error('Popup: Injections failed:', e);
-        }
-    }
-
-    init();
-
-    // In popup context, we need to find the correct Labb tab
     async function getLabbTab() {
-        // First try the current active tab
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (activeTab && (activeTab.url?.includes('labbreport.com') || activeTab.url?.includes('labb.com'))) return activeTab;
-
-        // Otherwise find any Labb tab
         const allTabs = await chrome.tabs.query({ url: ["*://labbreport.com/*", "*://labb.com/*"] });
         return allTabs[0] || null;
     }
 
-    // Toggle multi-select options
-    if (selectBox && typeOptions) {
-        selectBox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            typeOptions.classList.toggle('hidden');
-        });
-
-        typeOptions.addEventListener('click', (e) => e.stopPropagation());
+    async function injectScript(tabId) {
+        try {
+            await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+        } catch (e) { console.error('Injection failed:', e); }
     }
 
-    document.addEventListener('click', () => {
-        if (typeOptions) typeOptions.classList.add('hidden');
-    });
-
-    // Phase 1: Build Master List
     buildBtn.addEventListener('click', async () => {
-        buildBtn.disabled = true;
-        buildBtn.innerHTML = '<span class="icon">⌛</span> Initializing...';
-        statusText.innerText = 'Connecting to page...';
-        progressBar.style.width = '10%';
-        statusCard.classList.add('processing');
-
+        setScanningUI(true);
         const tab = await getLabbTab();
-
         if (!tab) {
-            statusText.innerText = 'Error: LabbReport Employee script not found or wrong page open.';
-            buildBtn.disabled = false;
-            buildBtn.innerHTML = '<span class="icon">🔍</span> Build Master List';
-            statusCard.classList.remove('processing');
+            statusText.innerText = 'Error: LabbReport page not found.';
+            setScanningUI(false);
             return;
         }
 
         chrome.tabs.sendMessage(tab.id, { action: 'PING' }, (response) => {
             if (chrome.runtime.lastError || !response) {
-                chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    files: ['content.js']
-                }, () => {
-                    if (chrome.runtime.lastError) {
-                        statusText.innerText = 'Error: Script injection failed.';
-                        buildBtn.disabled = false;
-                        statusCard.classList.remove('processing');
-                    } else {
-                        // Retry start
-                        chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
-                    }
+                chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }, () => {
+                    chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
                 });
             } else {
                 chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
@@ -226,180 +169,252 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle Progress & Results
-    chrome.runtime.onMessage.addListener((message) => {
-        if (message.type === 'extraction_progress') {
-            progressBar.style.width = `${message.progress}%`;
-            statusText.innerText = message.message || `Scanned ${message.count} employees...`;
-            buildBtn.innerHTML = `<span class="icon">⌛</span> Scanning... (${message.count})`;
-
-            if (message.metadata) {
-                showInfoBanner(message.metadata);
-            }
-        } else if (message.type === 'extraction_error') {
-            statusCard.classList.remove('processing');
-            statusText.innerText = `Error: ${message.message}`;
+    function setScanningUI(isScanning) {
+        if (isScanning) {
+            buildBtn.disabled = true;
+            buildBtn.innerHTML = '<span class="icon">⌛</span> Scanning...';
+            statusText.innerText = 'Extracting data from LabbReport...';
+            setupView.querySelector('.status-card').classList.add('processing');
+        } else {
             buildBtn.disabled = false;
-            buildBtn.innerHTML = '<span class="icon">🔍</span> Build Master List';
-        } else if (message.type === 'extraction_complete') {
-            statusCard.classList.remove('processing');
-            allEmployees = message.data.map((emp, index) => ({ ...emp, id: index }));
+            buildBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg> Build Master List';
+            setupView.querySelector('.status-card').classList.remove('processing');
+        }
+    }
 
-            if (message.metadata) {
-                showInfoBanner(message.metadata);
-                chrome.storage.local.set({
-                    lastScan: message.metadata,
-                    allEmployees: allEmployees
-                });
-            }
+    rescanBtn.addEventListener('click', async () => {
+        if (confirm('Clear current results and begin a fresh scan?')) {
+            await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
+            allEmployees = [];
+            excludedIds = new Set();
+            selectedWinners = [];
 
-            populateTypeFilters();
-            renderIntegratedPool();
-            updatePoolCounts();
-            setupView.classList.add('hidden');
-            selectionView.classList.remove('hidden');
+            setupView.classList.remove('hidden');
+            selectionView.classList.add('hidden');
+            winnerView.classList.add('hidden');
+
+            progressBar.style.width = '0%';
+            setScanningUI(false);
+            buildBtn.click();
         }
     });
 
-    const excludeTerminatedToggle = document.getElementById('exclude-terminated-toggle');
-    const downloadPoolCsvBtn = document.getElementById('download-pool-csv');
+    // --- MESSAGE HANDLING ---
+    chrome.runtime.onMessage.addListener((message) => {
+        if (message.type === 'extraction_progress') {
+            progressBar.style.width = `${message.progress}%`;
+            statusText.innerText = `Scanned ${message.count} employees...`;
+            buildBtn.innerHTML = `<span class="icon">⌛</span> Scanning... (${message.count})`;
+            if (message.metadata) showInfoBanner(message.metadata);
+        } else if (message.type === 'extraction_complete') {
+            allEmployees = message.data;
 
-    if (excludeTerminatedToggle) {
-        excludeTerminatedToggle.addEventListener('change', () => {
-            renderIntegratedPool();
-            updatePoolCounts();
-        });
-    }
-
-    function populateTypeFilters() {
-        const types = [...new Set(allEmployees.map(emp => emp.type || 'Standard'))].sort();
-        typeOptions.innerHTML = '';
-        selectedTypes.clear();
-
-        types.forEach(type => {
-            const div = document.createElement('div');
-            div.className = 'option';
-            div.innerHTML = `
-                <input type="checkbox" value="${type}" id="type-${type}">
-                <label for="type-${type}">${type}</label>
-            `;
-            const checkbox = div.querySelector('input');
-            checkbox.addEventListener('change', () => {
-                if (checkbox.checked) selectedTypes.add(type);
-                else selectedTypes.delete(type);
-                updateSelectBoxText();
-                renderIntegratedPool();
-                updatePoolCounts();
-            });
-            typeOptions.appendChild(div);
-        });
-        updateSelectBoxText();
-    }
-
-    function updateSelectBoxText() {
-        if (!selectBox) return;
-        if (selectedTypes.size === 0) {
-            selectBox.innerText = 'All Types (Default)';
-        } else if (selectedTypes.size === 1) {
-            selectBox.innerText = [...selectedTypes][0];
-        } else {
-            selectBox.innerText = `${selectedTypes.size} Types Selected`;
-        }
-    }
-
-    function renderIntegratedPool() {
-        mainEmployeeList.innerHTML = '';
-        const currentList = getFilteredPool(true); // Get list ignoring manual removals for display
-
-        currentList.forEach(emp => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            const isRemoved = removedIds.has(emp.uniqueKey);
-            if (isRemoved) item.style.opacity = '0.35';
-
-            item.innerHTML = `
-                <div class="item-info">
-                    <h5>${emp.firstName} ${emp.lastName}</h5>
-                    <p>${emp.position || 'Standard'} | ${emp.type || 'Full-time'} | ${emp.status}</p>
-                    <p class="org-name-hint">${emp.organization}</p>
-                </div>
-                <button class="remove-btn" title="${isRemoved ? 'Restore' : 'Exclude'}">
-                    ${isRemoved ? '↺' : '×'}
-                </button>
-            `;
-
-            const btn = item.querySelector('.remove-btn');
-            btn.addEventListener('click', () => {
-                if (removedIds.has(emp.uniqueKey)) {
-                    removedIds.delete(emp.uniqueKey);
-                    item.style.opacity = '1';
-                    btn.innerHTML = '×';
-                } else {
-                    removedIds.add(emp.uniqueKey);
-                    item.style.opacity = '0.35';
-                    btn.innerHTML = '↺';
+            // Auto-exclude Terminated on first scan
+            excludedIds = new Set();
+            allEmployees.forEach(emp => {
+                if ((emp.status || '').toLowerCase().includes('terminated')) {
+                    excludedIds.add(emp.uniqueKey);
                 }
-                updatePoolCounts();
-                chrome.storage.local.set({ removedIds: [...removedIds] });
             });
 
-            mainEmployeeList.appendChild(item);
-        });
-    }
+            chrome.storage.local.set({
+                allEmployees,
+                removedIds: [...excludedIds],
+                lastScan: message.metadata
+            });
 
-    function getFilteredPool(ignoreManualRemovals = false) {
-        return allEmployees.filter(emp => {
-            const matchesType = selectedTypes.size === 0 || selectedTypes.has(emp.type || 'Full-time');
-            const isTerminated = (emp.status || '').toLowerCase().includes('terminated');
-            const statusMatch = !excludeTerminatedToggle.checked || !isTerminated;
+            showInfoBanner(message.metadata);
+            setupFilters();
+            renderUI();
 
-            const isManualRemoved = !ignoreManualRemovals && removedIds.has(emp.uniqueKey);
-            return matchesType && statusMatch && !isManualRemoved;
-        });
-    }
-
-    function updatePoolCounts() {
-        const pool = getFilteredPool();
-        const total = allEmployees.length;
-
-        if (poolCountText) poolCountText.innerText = `${pool.length} available`;
-
-        if (extractionSummary) {
-            extractionSummary.innerText = `Ready to select from ${pool.length} employees.`;
-            if (pool.length < total) {
-                const filteredOut = total - pool.length;
-                extractionSummary.innerText += ` (${filteredOut} filtered out)`;
-            }
+            setupView.classList.add('hidden');
+            selectionView.classList.remove('hidden');
+        } else if (message.type === 'extraction_error') {
+            statusText.innerText = `Error: ${message.message}`;
+            setScanningUI(false);
         }
+    });
+
+    // --- FILTER SETUP ---
+    function setupFilters() {
+        const statuses = [...new Set(allEmployees.map(e => e.status || 'Active'))].sort();
+        const types = [...new Set(allEmployees.map(e => e.type || 'Standard'))].sort();
+
+        // If selectedTypes is empty, it means we show everything by default
+        if (selectedTypes.size === 0) {
+            types.forEach(t => selectedTypes.add(t));
+        }
+
+        renderCheckboxGroup(statusFilterOptions, statuses, selectedStatuses, 'status');
+        renderCheckboxGroup(typeFilterOptions, types, selectedTypes, 'type');
+        updateFilterCountBadge();
     }
 
-    // Selection Logic
-    if (selectRandomBtn) {
-        selectRandomBtn.addEventListener('click', () => {
-            const pool = getFilteredPool();
-            const count = parseInt(countInput.value) || 1;
-
-            if (pool.length === 0) {
-                alert('No available employees in the current filtered pool.');
-                return;
-            }
-
-            const shuffled = [...pool].sort(() => 0.5 - Math.random());
-            selectedWinners = shuffled.slice(0, Math.min(count, pool.length));
-
-            showWinners(selectedWinners);
+    function renderCheckboxGroup(container, options, activeSet, name) {
+        container.innerHTML = '';
+        options.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'check-item';
+            label.innerHTML = `
+                <input type="checkbox" ${activeSet.has(opt) ? 'checked' : ''} data-val="${opt}">
+                <span class="check-label">${opt}</span>
+            `;
+            label.querySelector('input').addEventListener('change', (e) => {
+                if (e.target.checked) activeSet.add(opt);
+                else activeSet.delete(opt);
+                updateFilterCountBadge();
+                renderUI();
+            });
+            container.appendChild(label);
         });
     }
 
-    function showWinners(selected) {
+    function updateFilterCountBadge() {
+        const totalFilters = selectedStatuses.size + selectedTypes.size;
+        activeFilterCount.innerText = totalFilters;
+    }
+
+    // --- DROPDOWN CONTROL ---
+    filterDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (filterMenu && !filterMenu.contains(e.target)) {
+            filterMenu.classList.add('hidden');
+        }
+    });
+
+    // --- VIEW LOGIC ---
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        renderUI();
+    });
+
+    function getFilteredList() {
+        return allEmployees.filter(emp => {
+            // Text Search
+            const name = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+            if (searchQuery && !name.includes(searchQuery)) return false;
+
+            // Status Filter
+            if (!selectedStatuses.has(emp.status)) return false;
+
+            // Type Filter
+            if (!selectedTypes.has(emp.type)) return false;
+
+            return true;
+        });
+    }
+
+    function renderUI() {
+        const filtered = getFilteredList();
+        const availableCount = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey)).length;
+
+        // Update Labels
+        visibleCountLabel.innerText = filtered.length;
+        selectedCountLabel.innerText = availableCount;
+        footerSelectedCount.innerText = availableCount;
+        totalCountLabel.innerText = allEmployees.length;
+
+        renderEmployees(filtered);
+    }
+
+    function renderEmployees(list) {
+        mainEmployeeList.innerHTML = '';
+        const emptyState = selectionView.querySelector('.empty-state');
+
+        if (list.length === 0) {
+            emptyState.classList.remove('hidden');
+            return;
+        } else {
+            emptyState.classList.add('hidden');
+        }
+
+        list.forEach(emp => {
+            const isExcluded = excludedIds.has(emp.uniqueKey);
+            const card = document.createElement('div');
+            card.className = `employee-card ${isExcluded ? 'excluded' : ''}`;
+
+            const statusClass = (emp.status || '').toLowerCase().includes('active') ? 'status-active' : 'status-terminated';
+
+            card.innerHTML = `
+                <div class="card-main">
+                    <span class="card-name">${emp.firstName} ${emp.lastName}</span>
+                    <div class="card-tags">
+                        <span class="tag">${emp.position || 'Standard'}</span>
+                        <div class="tag-dot"></div>
+                        <span class="tag">${emp.type}</span>
+                        <div class="tag-dot"></div>
+                        <span class="status-badge ${statusClass}">${emp.status}</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="toggle-inclusion" title="${isExcluded ? 'Restore to selection' : 'Exclude from selection'}">
+                        ${isExcluded
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'}
+                    </button>
+                </div>
+            `;
+
+            card.querySelector('.toggle-inclusion').addEventListener('click', () => {
+                if (excludedIds.has(emp.uniqueKey)) excludedIds.delete(emp.uniqueKey);
+                else excludedIds.add(emp.uniqueKey);
+
+                chrome.storage.local.set({ removedIds: [...excludedIds] });
+                renderUI();
+            });
+
+            mainEmployeeList.appendChild(card);
+        });
+    }
+
+    // --- BATCH ACTIONS ---
+    includeVisibleBtn.addEventListener('click', () => {
+        const filtered = getFilteredList();
+        filtered.forEach(emp => excludedIds.delete(emp.uniqueKey));
+        chrome.storage.local.set({ removedIds: [...excludedIds] });
+        renderUI();
+    });
+
+    excludeVisibleBtn.addEventListener('click', () => {
+        const filtered = getFilteredList();
+        filtered.forEach(emp => excludedIds.add(emp.uniqueKey));
+        chrome.storage.local.set({ removedIds: [...excludedIds] });
+        renderUI();
+    });
+
+    // --- SELECTION ACTION ---
+    selectRandomBtn.addEventListener('click', () => {
+        const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
+        const count = parseInt(randomCountInput.value) || 1;
+
+        if (pool.length === 0) {
+            alert('No employees selected for selection. Please include some common employees in the pool.');
+            return;
+        }
+
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        selectedWinners = shuffled.slice(0, Math.min(count, pool.length));
+
+        showWinners(selectedWinners);
+    });
+
+    function showWinners(winners) {
         winnerList.innerHTML = '';
-        selected.forEach((emp, index) => {
+        winners.forEach((emp, index) => {
             const card = document.createElement('div');
             card.className = 'winner-card';
             card.innerHTML = `
-                <h4><span style="color:var(--accent)">#${index + 1}</span> ${emp.firstName} ${emp.lastName}</h4>
+                <p class="label">#${index + 1}</p>
+                <h4>${emp.firstName} ${emp.lastName}</h4>
                 <p>${emp.organization} | ${emp.type}</p>
-                <p>DOB: ${emp.dob} | Status: ${emp.status}</p>
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                    <span class="tag">DOB: ${emp.dob}</span>
+                    <span class="tag">${emp.phone || ''}</span>
+                </div>
             `;
             winnerList.appendChild(card);
         });
@@ -408,23 +423,23 @@ document.addEventListener('DOMContentLoaded', () => {
         winnerView.classList.remove('hidden');
     }
 
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            winnerView.classList.add('hidden');
-            selectionView.classList.remove('hidden');
-        });
-    }
+    resetBtn.addEventListener('click', () => {
+        winnerView.classList.add('hidden');
+        selectionView.classList.remove('hidden');
+    });
 
-    // CSV Exports
+    // --- CSV ENGINE ---
     function downloadCSV(data, filename) {
         if (!data.length) return;
-        const headers = ['firstName', 'lastName', 'organization', 'type', 'dob', 'phone', 'email', 'status', 'position'];
-        const csv = [
-            headers.join(','),
-            ...data.map(row => headers.map(h => JSON.stringify(row[h] || '')).join(','))
-        ].join('\n');
+        // Include BOM for Excel
+        const BOM = '\uFEFF';
+        const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position'];
+        const rows = data.map(e => [
+            e.firstName, e.lastName, e.organization, e.type, e.dob, e.phone, e.email, e.status, e.position
+        ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','));
 
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const csvContent = BOM + headers.join(',') + '\n' + rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -432,32 +447,21 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
     }
 
-    if (downloadAllCsvBtn) {
-        downloadAllCsvBtn.addEventListener('click', () => {
-            downloadCSV(allEmployees, 'Labb_Full_Employee_Export');
-        });
+    downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
+    downloadPoolCsvBtn.addEventListener('click', () => {
+        const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
+        downloadCSV(pool, 'Labb_Selected_Selection_Pool');
+    });
+    downloadWinnersCsvBtn.addEventListener('click', () => downloadCSV(selectedWinners, 'Random_Testing_Results'));
+
+    // --- UTILS ---
+    function showInfoBanner(meta) {
+        if (!meta) return;
+        document.getElementById('display-org-name').innerText = meta.orgName || '---';
+        document.getElementById('display-org-id').innerText = meta.orgId || '---';
+        document.getElementById('display-total-records').innerText = meta.totalRecords || '---';
+        document.getElementById('display-user').innerText = meta.userName || '---';
     }
 
-    if (downloadPoolCsvBtn) {
-        downloadPoolCsvBtn.addEventListener('click', () => {
-            const pool = getFilteredPool();
-            downloadCSV(pool, 'Labb_Filtered_Pool_Selection');
-        });
-    }
-
-    if (downloadWinnersCsvBtn) {
-        downloadWinnersCsvBtn.addEventListener('click', () => {
-            downloadCSV(selectedWinners, 'Random_Testing_Selected_Employees');
-        });
-    }
-
-    const clearScanBtn = document.getElementById('clear-scan-btn');
-    if (clearScanBtn) {
-        clearScanBtn.addEventListener('click', async () => {
-            if (confirm('This will delete all current scan results and reset the app. Are you sure?')) {
-                await chrome.storage.local.clear();
-                window.location.reload();
-            }
-        });
-    }
+    init();
 });

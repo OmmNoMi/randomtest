@@ -14,7 +14,7 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - **Unique Key Logic**: Moved from simple deduplication to a position-based `uniqueKey` system (`firstName-lastName-dob-index`) to ensure all 24 records on a page are accurately captured.
 - **Column Mapping**: Corrected specific LabbReport table mapping where Column 5 is Position and Column 6 is Employment Type/Status.
 
-### Phase 3: Workflow Optimization & UI Overhaul
+### Phase 3: Workflow Optimization & Initial UI
 - **4-Step Workflow Implementation**:
     1. **Extract**: Full automated scan.
     2. **Refine**: Single-click manual exclusion (using persistent `removedIds`).
@@ -22,31 +22,34 @@ This document serves as a comprehensive log of the development lifecycle, archit
     4. **Export**: Dual-mode CSV export (Full Master vs. Filtered Selection).
 - **UI Aesthetics**: Implemented a "Premium Dark" glassmorphism theme using HSL color variables and smooth CSS transitions.
 
-### Phase 4: Professionalization & Maintenance
-- **GitHub Integration**: Created the `ommnomi/randomtest` repository and pushed the initial stable build.
-- **Documentation**: Generated the `README.md` for installation and basic usage.
-- **Clear & Rescan**: Added a global header button (🔄) to instantly reset storage and trigger a fresh scan, improving the iteration speed for users.
-- **Responsive Design**: Optimized the UI for both the standard small Chrome popup window and the expanded full-tab view.
+### Phase 4: "Premium Dark" UI & Advanced UX Overhaul (v2.0)
+- **Aesthetic Redesign**: Transitioned to a "Premium Dark" glassmorphism theme using Tailwind-inspired CSS principles, optimizing screen real estate for the 380px Chrome popup width.
+- **Decoupled Filtering vs. Selection**: Fundamentally separated **View Filters** (who you see on screen) from **Selection Pool** (who is actually picked). Searching for a specific department no longer automatically excludes everyone else from the pool.
+- **Unified Filters Menu**: Consolidated Employment Type and Status filters into a single, space-saving dropdown menu to maximize space for the Search bar.
+- **Smart Terminated Handling**: By default, Terminated employees are both hidden from the view and excluded from the selection pool. They can easily be toggled back via the Filters menu or "All/None" buttons and included if needed.
+- **Targeted Batch Actions**: Added "Visible: All / None" buttons that intelligently apply selection/deselection only to the employees currently matching the active search and filter criteria.
+- **Streamlined Actions**: Moved "Export All" and "Export Selected" buttons to the main footer alongside the Randomize action for better user flow.
 
 ## 🏗️ Architectural Decisions
 
 ### 1. Data Storage Strategy
 - **Why `chrome.storage.local`?**: We chose local storage to persist scan results across popup closes. This allows a user to "Build List" in the popup, close it, and return later to "Run Selection" without rescanning.
 
-### 2. Filtering Logic
-- **"Source of Truth" Approach**: `allEmployees` always contains every record found. Filtering is applied in real-time via the `getFilteredPool()` function. This prevents data loss while allowing flexible views.
-- **Integrated Header Filters**: We moved filters into the pool header to maximize vertical space for the employee list, especially critical in the 380px-wide standard popup.
+### 2. Filtering Logic (Decoupled Architecture)
+- **Source of Truth**: `allEmployees` always contains every record found.
+- **View State (filteredEmployees)**: Controlled by the Search bar, Status filter, and Type filter.
+- **Selection State (excludedIds)**: Controlled by individual inclusion/exclusion toggles and **Batch Actions**. This ensures users don't accidentally drop candidates just by searching for a name.
 
 ### 3. CSV Engine
-- **Encoding**: Uses UTF-8 with a BOM (Byte Order Mark) to ensure high compatibility with Excel and Google Sheets, especially for names with special characters.
+- **Encoding**: Uses UTF-8 with a BOM (Byte Order Mark) for Microsoft Excel compatibility.
+- **Dynamic Headers**: Ensures all employee data fields (including Position and DOB) are included in every export.
 
 ## 🚀 Future Improvement Roadmap
 
 - [ ] **Offline Mode Detection**: Better handling of connection loss during multi-page scans.
 - [ ] **Advanced Randomization**: Options for weighted selection (e.g., specific departments get higher priority).
 - [ ] **Custom Column Mapping**: Allow users to re-map columns if LabbReport updates their table structure in the future.
-- [ ] **Batch Removal**: Add a "Select All" / "Deselect All" feature for large pools.
-- [ ] **Theme Toggle**: Add a Light Mode option for High-Contrast users.
+- [ ] **Export Formats**: Add direct PDF export functionality for compliance record-keeping.
 
 ---
-*Last Updated: 2026-03-03*
+*Last Updated: March 2026*
