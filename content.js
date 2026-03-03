@@ -124,6 +124,12 @@
                 const cells = row.querySelectorAll('td');
                 // Labb Columns: Org(0), First(1), Last(2), DOB(3), Phone(4), Position/Email(5), Type(6), Actions(7)
                 if (cells.length >= 7) {
+                    let typeValue = cells[6]?.innerText.trim() || 'Full-time';
+                    // Normalize common types
+                    if (typeValue.toLowerCase().includes('contract')) typeValue = 'Contract';
+                    if (typeValue.toLowerCase().includes('full-time')) typeValue = 'Full-time';
+                    if (typeValue.toLowerCase().includes('part-time')) typeValue = 'Part-time';
+
                     const rowData = {
                         organization: cells[0]?.innerText.trim(),
                         firstName: cells[1]?.innerText.trim(),
@@ -131,7 +137,7 @@
                         dob: cells[3]?.innerText.trim(),
                         phone: cells[4]?.innerText.trim(),
                         position: cells[5]?.innerText.trim() || 'Standard',
-                        type: cells[6]?.innerText.trim() || 'Full-time',
+                        type: typeValue,
                         status: 'Active'
                     };
 

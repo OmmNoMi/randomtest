@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchQuery = '';
     let isDarkMode = true;
 
+    let filtersLoaded = false;
+
     // --- INITIALIZATION ---
     async function init() {
         // Load theme
@@ -57,14 +59,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Load data
-        const storage = await chrome.storage.local.get(['allEmployees', 'removedIds', 'lastScan', 'rt_scan_state']);
+        const storage = await chrome.storage.local.get(['allEmployees', 'removedIds', 'lastScan', 'rt_scan_state', 'filterStore']);
+
+        if (storage.filterStore) {
+            selectedStatuses = new Set(storage.filterStore.statuses || ['Active']);
+            selectedTypes = new Set(storage.filterStore.types || []);
+            searchQuery = storage.filterStore.search || '';
+            searchInput.value = searchQuery;
+            filtersLoaded = true;
+        }
 
         if (storage.allEmployees && storage.allEmployees.length > 0) {
             allEmployees = storage.allEmployees;
             excludedIds = new Set(storage.removedIds || []);
-
-            // If we have data, we might need to sync the "Terminated" exclusion if not already explicitly set
-            // But usually we just follow the state.
 
             showInfoBanner(storage.lastScan);
             setupFilters();
@@ -240,8 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const statuses = [...new Set(allEmployees.map(e => e.status || 'Active'))].sort();
         const types = [...new Set(allEmployees.map(e => e.type || 'Standard'))].sort();
 
-        // If selectedTypes is empty, it means we show everything by default
-        if (selectedTypes.size === 0) {
+        // If this is a fresh load (no saved filters) and selection is empty
+        if (!filtersLoaded && selectedTypes.size === 0) {
             types.forEach(t => selectedTypes.add(t));
         }
 
@@ -262,10 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
             label.querySelector('input').addEventListener('change', (e) => {
                 if (e.target.checked) activeSet.add(opt);
                 else activeSet.delete(opt);
+                saveFilters();
                 updateFilterCountBadge();
                 renderUI();
             });
             container.appendChild(label);
+        });
+    }
+
+    function saveFilters() {
+        chrome.storage.local.set({
+            filterStore: {
+                statuses: [...selectedStatuses],
+                types: [...selectedTypes],
+                search: searchQuery
+            }
         });
     }
 
@@ -275,6 +293,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- DROPDOWN CONTROL ---
+    filterMenu.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('text-link')) {
+            const group = target.getAttribute('data-group');
+            const action = target.getAttribute('data-action');
+            const masterSet = group === 'status' ? selectedStatuses : selectedTypes;
+            const container = group === 'status' ? statusFilterOptions : typeFilterOptions;
+
+            if (action === 'all') {
+                const inputs = container.querySelectorAll('input[type="checkbox"]');
+                inputs.forEach(input => masterSet.add(input.getAttribute('data-val')));
+            } else {
+                masterSet.clear();
+            }
+
+            saveFilters();
+            setupFilters();
+            renderUI();
+        }
+    });
+
     filterDropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         filterMenu.classList.toggle('hidden');
@@ -289,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- VIEW LOGIC ---
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase();
+        saveFilters();
         renderUI();
     });
 
