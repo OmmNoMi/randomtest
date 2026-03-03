@@ -164,9 +164,20 @@ body {
 }
 
 .icon-btn-border:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-hover);
-    color: var(--text-primary);
+    border-color: var(--primary);
+    background: var(--primary-glow);
+    color: var(--primary);
+}
+
+#rescan-btn {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-glow);
+}
+
+#rescan-btn:hover {
+    background: var(--primary);
+    color: white;
 }
 
 .icon-btn-border.text-label {
@@ -258,7 +269,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
+    max-width: 170px;
 }
 
 /* MAIN WORKSPACE */
@@ -686,20 +697,24 @@ body {
 
 .batch-btn.success {
     color: var(--accent-emerald);
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.1);
 }
 
 .batch-btn.success:hover {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.15);
+    border-color: var(--accent-emerald);
 }
 
 .batch-btn.danger {
     color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.05);
+    border: 1px solid rgba(244, 63, 94, 0.1);
 }
 
 .batch-btn.danger:hover {
-    background: rgba(244, 63, 94, 0.1);
-    border-color: rgba(244, 63, 94, 0.2);
+    background: rgba(244, 63, 94, 0.15);
+    border-color: var(--accent-rose);
 }
 
 /* VIEWPORT BANNER */
@@ -835,15 +850,26 @@ body {
     transition: all 0.2s;
 }
 
-.toggle-inclusion:hover {
-    background: var(--accent-rose);
-    border-color: var(--accent-rose);
+.toggle-inclusion.btn-add {
+    color: var(--accent-emerald);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.toggle-inclusion.btn-add:hover {
+    background: var(--accent-emerald);
     color: white;
 }
 
-.excluded .toggle-inclusion:hover {
-    background: var(--accent-emerald);
-    border-color: var(--accent-emerald);
+.toggle-inclusion.btn-remove {
+    color: var(--accent-rose);
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+.toggle-inclusion.btn-remove:hover {
+    background: var(--accent-rose);
+    color: white;
 }
 
 .toggle-inclusion svg {
