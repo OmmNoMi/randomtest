@@ -10,7 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const setupView = document.getElementById('setup-view');
     const selectionView = document.getElementById('selection-view');
     const winnerView = document.getElementById('winner-view');
+    const rescanBtn = document.getElementById('rescan-btn');
     const statusCard = setupView.querySelector('.status-card');
+
+    if (rescanBtn) {
+        rescanBtn.addEventListener('click', async () => {
+            // Clear selection results but NOT metadata
+            await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
+            allEmployees = [];
+            removedIds = new Set();
+            selectedWinners = [];
+
+            // Visual reset
+            setupView.classList.remove('hidden');
+            selectionView.classList.add('hidden');
+            winnerView.classList.add('hidden');
+
+            statusText.innerText = 'Ready to scan and extract list.';
+            progressBar.style.width = '0%';
+            statusCard.classList.remove('processing');
+            buildBtn.disabled = false;
+            buildBtn.innerHTML = '<span class="icon">🔍</span> Build Master List';
+
+            // Trigger scan automatically
+            buildBtn.click();
+        });
+    }
 
     // Hide expand button if we're already in a full tab
     if (window.innerWidth > 500) {

@@ -64,10 +64,19 @@ header {
 }
 
 .logo {
-    font-size: 1.75rem;
+    font-size: 1.15rem;
     font-weight: 900;
     letter-spacing: -0.05em;
     color: white;
+}
+
+.logo span {
+    color: var(--primary-glow);
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
 }
 
 .icon-btn {
@@ -310,24 +319,31 @@ header {
 .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .header-main {
     display: flex;
-    align-items: center;
-    gap: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
     flex: 1;
-    min-width: 300px;
+}
+
+.header-main h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: white;
 }
 
 .inline-filters {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .toggle-item {
