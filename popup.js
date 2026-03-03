@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.tabs.create({ url: chrome.runtime.getURL('popup.html') });
     });
 
-    if (window.innerWidth > 500) {
+    if (window.innerWidth > 700) {
         expandBtn.classList.add('hidden');
     }
 

@@ -146,27 +146,39 @@ body {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .icon-btn-border {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
-    padding: 8px;
+    padding: 6px;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     transition: all 0.2s;
+    flex-shrink: 0;
 }
 
 .icon-btn-border:hover {
     border-color: var(--primary);
     background: var(--primary-glow);
     color: var(--primary);
+}
+
+#expand-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+#expand-btn:hover {
+    background: #4338CA;
+    transform: scale(1.05);
 }
 
 #rescan-btn {
@@ -201,17 +213,37 @@ body {
 /* CONTEXT CARDS */
 .context-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 8px;
     padding: 8px;
     background: var(--bg-toolbar);
     border: 1px solid var(--border-color);
     border-radius: 16px;
 }
 
+@media screen and (min-width: 450px) {
+    .context-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .context-grid {
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .context-card {
+        padding: 8px;
+        gap: 6px;
+    }
+}
+
 @media screen and (min-width: 800px) {
     .context-grid {
         grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        padding: 12px;
     }
 }
 
@@ -269,7 +301,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 170px;
+    width: 100%;
 }
 
 /* MAIN WORKSPACE */
