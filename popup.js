@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterMenu = document.getElementById('filter-menu');
     const statusFilterOptions = document.getElementById('status-filter-options');
     const typeFilterOptions = document.getElementById('type-filter-options');
+    const inclusionFilterOptions = document.getElementById('inclusion-filter-options');
     const activeFilterCount = document.getElementById('active-filter-count');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
 
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let excludedIds = new Set();
     let selectedStatuses = new Set(['Active']); // Exclude Terminated by default
     let selectedTypes = new Set(); // Empty means all allowed initially
+    let selectedInclusion = new Set(['Selected', 'Unselected']);
     let searchQuery = '';
     let isDarkMode = true;
 
@@ -65,9 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (storage.filterStore) {
             selectedStatuses = new Set(storage.filterStore.statuses || ['Active']);
             selectedTypes = new Set(storage.filterStore.types || []);
+            selectedInclusion = new Set(storage.filterStore.inclusion || ['Selected', 'Unselected']);
             searchQuery = storage.filterStore.search || '';
             searchInput.value = searchQuery;
             filtersLoaded = true;
+
+            // Update UI for inclusion filters since they aren't dynamic
+            const selCheck = document.getElementById('filter-selected');
+            const unselCheck = document.getElementById('filter-unselected');
+            if (selCheck) selCheck.checked = selectedInclusion.has('Selected');
+            if (unselCheck) unselCheck.checked = selectedInclusion.has('Unselected');
         }
 
         if (storage.allEmployees && storage.allEmployees.length > 0) {
@@ -282,12 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Delegated listener for filter groups
-    [statusFilterOptions, typeFilterOptions].forEach(container => {
+    [statusFilterOptions, typeFilterOptions, inclusionFilterOptions].forEach(container => {
+        if (!container) return;
         container.addEventListener('change', (e) => {
             if (e.target.type === 'checkbox') {
                 const val = e.target.getAttribute('data-val');
                 const isStatus = container.id.includes('status');
-                const targetSet = isStatus ? selectedStatuses : selectedTypes;
+                const isInclusion = container.id.includes('inclusion');
+
+                let targetSet;
+                if (isStatus) targetSet = selectedStatuses;
+                else if (isInclusion) targetSet = selectedInclusion;
+                else targetSet = selectedTypes;
 
                 if (e.target.checked) targetSet.add(val);
                 else targetSet.delete(val);
@@ -304,13 +319,14 @@ document.addEventListener('DOMContentLoaded', () => {
             filterStore: {
                 statuses: [...selectedStatuses],
                 types: [...selectedTypes],
+                inclusion: [...selectedInclusion],
                 search: searchQuery
             }
         });
     }
 
     function updateFilterCountBadge() {
-        const totalFilters = selectedStatuses.size + selectedTypes.size;
+        const totalFilters = selectedStatuses.size + selectedTypes.size + (selectedInclusion.size < 2 ? 1 : 0);
         if (activeFilterCount) activeFilterCount.innerText = totalFilters;
     }
 
@@ -318,8 +334,15 @@ document.addEventListener('DOMContentLoaded', () => {
     resetFiltersBtn.addEventListener('click', () => {
         selectedStatuses = new Set(['Active']);
         selectedTypes = new Set();
+        selectedInclusion = new Set(['Selected', 'Unselected']);
         searchQuery = '';
         searchInput.value = '';
+
+        // UI Reset for static filters
+        const selCheck = document.getElementById('filter-selected');
+        const unselCheck = document.getElementById('filter-unselected');
+        if (selCheck) selCheck.checked = true;
+        if (unselCheck) unselCheck.checked = true;
         filtersLoaded = false; // Allow re-populating types from data
         saveFilters();
         setupFilters();
@@ -374,6 +397,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Type Filter (Normalized)
             const eType = (emp.type || 'Not Specified').toLowerCase().trim();
             if (!normTypes.has(eType)) return false;
+
+            // Inclusion Filter
+            const isExcluded = excludedIds.has(emp.uniqueKey);
+            if (isExcluded && !selectedInclusion.has('Unselected')) return false;
+            if (!isExcluded && !selectedInclusion.has('Selected')) return false;
 
             return true;
         });
