@@ -323,13 +323,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderEmployees(list) {
         mainEmployeeList.innerHTML = '';
-        const emptyState = selectionView.querySelector('.empty-state');
+        const emptyState = selectionView ? selectionView.querySelector('.empty-state') : null;
 
         if (list.length === 0) {
-            emptyState.classList.remove('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
             return;
         } else {
-            emptyState.classList.add('hidden');
+            if (emptyState) emptyState.classList.add('hidden');
         }
 
         list.forEach(emp => {
