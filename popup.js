@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (chrome.runtime.lastError || !response) {
                     await injectScript(tab.id);
                     setTimeout(autoDetectMetadata, 2000);
-                } else if (response.metadata) {
+                } else if (response && response.metadata) {
                     showInfoBanner(response.metadata);
                 }
             });
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setScanningUI(true);
         const tab = await getLabbTab();
         if (!tab) {
-            statusText.innerText = 'Error: LabbReport page not found.';
+            if (statusText) statusText.innerText = 'Error: LabbReport page not found.';
             setScanningUI(false);
             return;
         }
@@ -179,14 +179,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setScanningUI(isScanning) {
         if (isScanning) {
-            buildBtn.disabled = true;
-            buildBtn.innerHTML = '<span class="icon">⌛</span> Scanning...';
-            statusText.innerText = 'Extracting data from LabbReport...';
-            setupView.querySelector('.status-card').classList.add('processing');
+            if (buildBtn) {
+                buildBtn.disabled = true;
+                buildBtn.innerHTML = '<span class="icon">⌛</span> Scanning...';
+            }
+            if (statusText) statusText.innerText = 'Extracting data from LabbReport...';
+            const statusCard = setupView ? setupView.querySelector('.status-card') : null;
+            if (statusCard) statusCard.classList.add('processing');
         } else {
-            buildBtn.disabled = false;
-            buildBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg> Build Master List';
-            setupView.querySelector('.status-card').classList.remove('processing');
+            if (buildBtn) {
+                buildBtn.disabled = false;
+                buildBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg> Build Master List';
+            }
+            const statusCard = setupView ? setupView.querySelector('.status-card') : null;
+            if (statusCard) statusCard.classList.remove('processing');
         }
     }
 
@@ -210,9 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MESSAGE HANDLING ---
     chrome.runtime.onMessage.addListener((message) => {
         if (message.type === 'extraction_progress') {
-            progressBar.style.width = `${message.progress}%`;
-            statusText.innerText = `Scanned ${message.count} employees...`;
-            buildBtn.innerHTML = `<span class="icon">⌛</span> Scanning... (${message.count})`;
+            if (progressBar) progressBar.style.width = `${message.progress}%`;
+            if (statusText) statusText.innerText = `Scanned ${message.count} employees...`;
+            if (buildBtn) buildBtn.innerHTML = `<span class="icon">⌛</span> Scanning... (${message.count})`;
             if (message.metadata) showInfoBanner(message.metadata);
         } else if (message.type === 'extraction_complete') {
             allEmployees = message.data;
@@ -305,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateFilterCountBadge() {
         const totalFilters = selectedStatuses.size + selectedTypes.size;
-        activeFilterCount.innerText = totalFilters;
+        if (activeFilterCount) activeFilterCount.innerText = totalFilters;
     }
 
     // --- DROPDOWN CONTROL ---
@@ -383,7 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (footerSelectedCount) footerSelectedCount.innerText = availableCount;
         if (totalCountLabel) totalCountLabel.innerText = allEmployees.length;
 
-        renderEmployees(filtered);
+        if (mainEmployeeList) {
+            renderEmployees(filtered);
+        }
     }
 
     function renderEmployees(list) {
@@ -522,10 +530,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UTILS ---
     function showInfoBanner(meta) {
         if (!meta) return;
-        document.getElementById('display-org-name').innerText = meta.orgName || '---';
-        document.getElementById('display-org-id').innerText = meta.orgId || '---';
-        document.getElementById('display-total-records').innerText = meta.totalRecords || '---';
-        document.getElementById('display-user').innerText = meta.userName || '---';
+        const orgNameEl = document.getElementById('display-org-name');
+        const orgIdEl = document.getElementById('display-org-id');
+        const totalRecordsEl = document.getElementById('display-total-records');
+        const userEl = document.getElementById('display-user');
+
+        if (orgNameEl) orgNameEl.innerText = meta.orgName || '---';
+        if (orgIdEl) orgIdEl.innerText = meta.orgId || '---';
+        if (totalRecordsEl) totalRecordsEl.innerText = meta.totalRecords || '---';
+        if (userEl) userEl.innerText = meta.userName || '---';
     }
 
     init();

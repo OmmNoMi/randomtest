@@ -1,4 +1,6 @@
 (function () {
+    if (window.rtScannerInjected) return;
+    window.rtScannerInjected = true;
     console.log('RandomTesting: Engine Initialized.');
 
     class LabbScanner {
