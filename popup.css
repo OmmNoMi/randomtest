@@ -107,29 +107,31 @@ body {
 .header-branding {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 1;
 }
 
 .logo-box {
-    padding: 8px;
+    padding: 6px;
     background: var(--primary-glow);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .icon-shield {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--primary);
 }
 
 .main-header h1 {
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 800;
     letter-spacing: 0.05em;
     margin: 0;
+    white-space: nowrap;
 }
 
 .main-header h1 span {
@@ -137,10 +139,10 @@ body {
 }
 
 .version {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: var(--text-muted);
     font-weight: 500;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .header-actions {
