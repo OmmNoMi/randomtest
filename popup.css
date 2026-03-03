@@ -397,11 +397,11 @@ body {
 }
 
 .toolbar-header {
-    padding: 16px 20px;
+    padding: 8px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .title-group h2 {
@@ -433,11 +433,7 @@ body {
 }
 
 .badge-label {
-    font-size: 0.55rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--primary);
-    opacity: 0.9;
+    display: none;
 }
 
 .badge-numbers {
@@ -447,7 +443,7 @@ body {
 }
 
 .count-now {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 900;
     color: var(--primary);
 }
@@ -491,12 +487,30 @@ body {
 
 /* TOOLBAR ACTIONS */
 .toolbar-actions {
-    padding: 12px 20px;
+    padding: 6px 16px 8px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     border-top: 1px solid var(--border-color);
     background: var(--bg-toolbar);
+}
+
+.workspace-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+.integrated-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-header);
+    backdrop-filter: blur(12px);
 }
 
 @media screen and (min-width: 1000px) {
@@ -508,28 +522,15 @@ body {
 }
 
 .group-label {
-    font-size: 0.6rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-    display: block;
+    display: none;
 }
 
 .filter-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-end;
     gap: 8px;
     flex: 1;
-}
-
-@media screen and (min-width: 450px) {
-    .filter-group {
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-    }
 }
 
 .search-box {
@@ -551,9 +552,9 @@ body {
     width: 100%;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    padding: 8px 12px 8px 32px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    padding: 5px 8px 5px 24px;
+    border-radius: 6px;
+    font-size: 0.7rem;
     color: var(--text-primary);
     outline: none;
     transition: all 0.2s;
@@ -572,15 +573,15 @@ body {
 .dropdown-btn {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     cursor: pointer;
-    min-width: 120px;
+    min-width: 90px;
     transition: all 0.2s;
 }
 
@@ -713,14 +714,14 @@ body {
 .batch-btn {
     background: transparent;
     border: 1px solid transparent;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 0.65rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     transition: all 0.2s;
 }
 
@@ -753,12 +754,13 @@ body {
 
 /* VIEWPORT BANNER */
 .viewport-banner {
-    padding: 8px 20px;
+    padding: 4px 16px;
     background: var(--bg-toolbar);
     border-top: 1px solid var(--border-color);
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     text-align: center;
     color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .viewport-banner strong {
@@ -770,11 +772,11 @@ body {
 .employee-list-container {
     flex: 1;
     overflow-y: auto;
-    padding: 16px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    min-height: 350px;
+    gap: 6px;
+    min-height: 250px;
     max-height: 550px;
 }
 
@@ -791,8 +793,8 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 10px;
+    padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -814,7 +816,7 @@ body {
 .card-main {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .card-name {
@@ -829,12 +831,12 @@ body {
 .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
 }
 
 .tag {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: var(--text-muted);
 }
@@ -847,11 +849,13 @@ body {
 }
 
 .status-badge {
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.6rem;
-    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.55rem;
+    font-weight: 800;
     border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .status-active {
@@ -871,9 +875,9 @@ body {
 }
 
 .toggle-inclusion {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--bg-card);
     color: var(--text-muted);
