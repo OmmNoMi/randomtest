@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilterOptions = document.getElementById('status-filter-options');
     const typeFilterOptions = document.getElementById('type-filter-options');
     const activeFilterCount = document.getElementById('active-filter-count');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
 
     const includeVisibleBtn = document.getElementById('include-visible-btn');
     const excludeVisibleBtn = document.getElementById('exclude-visible-btn');
@@ -244,11 +245,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FILTER SETUP ---
     function setupFilters() {
+        // Collect all unique statuses and types, ensuring we handle blanks consistently
         const statuses = [...new Set(allEmployees.map(e => (e.status || 'Active').trim()))].sort();
-        // Use 'Not Specified' as the fallback for empty types to match content.js
         const types = [...new Set(allEmployees.map(e => (e.type || 'Not Specified').trim()))].sort();
 
         // If this is a fresh load (no saved filters) and selection is empty
+        // We want to default to selecting ALL available types
         if (!filtersLoaded && selectedTypes.size === 0) {
             types.forEach(t => selectedTypes.add(t));
         }
@@ -326,6 +328,17 @@ document.addEventListener('DOMContentLoaded', () => {
             setupFilters();
             renderUI();
         }
+    });
+
+    resetFiltersBtn.addEventListener('click', () => {
+        selectedStatuses = new Set(['Active']);
+        selectedTypes = new Set();
+        searchQuery = '';
+        searchInput.value = '';
+        filtersLoaded = false; // Allow re-populating types from data
+        saveFilters();
+        setupFilters();
+        renderUI();
     });
 
     filterDropdownBtn.addEventListener('click', (e) => {

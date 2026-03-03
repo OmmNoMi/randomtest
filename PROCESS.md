@@ -22,12 +22,17 @@ This document serves as a comprehensive log of the development lifecycle, archit
     4. **Export**: Dual-mode CSV export (Full Master vs. Filtered Selection).
 - **UI Aesthetics**: Implemented a "Premium Dark" glassmorphism theme using HSL color variables and smooth CSS transitions.
 
-### Phase 4: "Premium Dark" UI & Advanced UX Overhaul (v2.0)
-- **Aesthetic Redesign**: Transitioned to a "Premium Dark" glassmorphism theme using Tailwind-inspired CSS principles, optimizing screen real estate for the 380px Chrome popup width.
-- **Decoupled Filtering vs. Selection**: Fundamentally separated **View Filters** (who you see on screen) from **Selection Pool** (who is actually picked). Searching for a specific department no longer automatically excludes everyone else from the pool.
-- **Unified Filters Menu**: Consolidated Employment Type and Status filters into a single, space-saving dropdown menu to maximize space for the Search bar.
-- **Smart Terminated Handling**: By default, Terminated employees are both hidden from the view and excluded from the selection pool. They can easily be toggled back via the Filters menu or "All/None" buttons and included if needed.
-- **Targeted Batch Actions**: Added "Visible: All / None" buttons that intelligently apply selection/deselection only to the employees currently matching the active search and filter criteria.
+### Phase 4: Modernization & Precision (v2.0)
+- **Premium UI**: Overhauled design with glassmorphism, HSL variables, and dark/light modes.
+- **Improved Extraction**: Added normalization for employment types and handled "Terminated" status reliably.
+- **Robust Filtering**:
+    - Decoupled "View Filters" from "Selection Pool" to prevent accidental data loss.
+    - Added "Not Specified" category for employees with blank employment types.
+    - Implemented case-insensitive, trimmed matching for filter reliability.
+    - Added "Reset to Defaults" option in the filter menu.
+    - Added "All | None" batch toggles for filter groups.
+- **Code Stability**: Fixed TypeErrors and implemented event delegation for interactive elements.
+- **Export Improvements**: Added UTF-8 BOM to CSVs for better Excel compatibility and included employment type in exports.
 - **Streamlined Actions**: Moved "Export All" and "Export Selected" buttons to the main footer alongside the Randomize action for better user flow.
 
 ## 🏗️ Architectural Decisions
