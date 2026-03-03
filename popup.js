@@ -245,7 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FILTER SETUP ---
     function setupFilters() {
         const statuses = [...new Set(allEmployees.map(e => (e.status || 'Active').trim()))].sort();
-        const types = [...new Set(allEmployees.map(e => (e.type || 'Standard').trim()))].sort();
+        // Use 'Not Specified' as the fallback for empty types to match content.js
+        const types = [...new Set(allEmployees.map(e => (e.type || 'Not Specified').trim()))].sort();
 
         // If this is a fresh load (no saved filters) and selection is empty
         if (!filtersLoaded && selectedTypes.size === 0) {
@@ -262,8 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
         options.forEach(opt => {
             const label = document.createElement('label');
             label.className = 'check-item';
+            // Ensure we check the active set case-insensitively or exactly as saved
+            const isChecked = activeSet.has(opt);
             label.innerHTML = `
-                <input type="checkbox" ${activeSet.has(opt) ? 'checked' : ''} data-val="${opt}">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} data-val="${opt}">
                 <span class="check-label">${opt}</span>
             `;
             container.appendChild(label);
@@ -358,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!normStatuses.has(eStatus)) return false;
 
             // Type Filter (Normalized)
-            const eType = (emp.type || 'Standard').toLowerCase().trim();
+            const eType = (emp.type || 'Not Specified').toLowerCase().trim();
             if (!normTypes.has(eType)) return false;
 
             return true;

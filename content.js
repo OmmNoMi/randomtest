@@ -124,11 +124,18 @@
                 const cells = row.querySelectorAll('td');
                 // Labb Columns: Org(0), First(1), Last(2), DOB(3), Phone(4), Position/Email(5), Type(6), Actions(7)
                 if (cells.length >= 7) {
-                    let typeValue = cells[6]?.innerText.trim() || 'Full-time';
-                    // Normalize common types
-                    if (typeValue.toLowerCase().includes('contract')) typeValue = 'Contract';
-                    if (typeValue.toLowerCase().includes('full-time')) typeValue = 'Full-time';
-                    if (typeValue.toLowerCase().includes('part-time')) typeValue = 'Part-time';
+                    let rawType = cells[6]?.innerText.trim() || '';
+                    let typeValue = 'Not Specified';
+
+                    if (rawType) {
+                        typeValue = rawType;
+                        // Normalize common types
+                        const lt = rawType.toLowerCase();
+                        if (lt.includes('contract')) typeValue = 'Contract';
+                        else if (lt.includes('full-time')) typeValue = 'Full-time';
+                        else if (lt.includes('part-time')) typeValue = 'Part-time';
+                        else if (lt.includes('pre-hire') || lt.includes('prehire')) typeValue = 'Pre-hire';
+                    }
 
                     const rowData = {
                         organization: cells[0]?.innerText.trim(),
@@ -136,7 +143,7 @@
                         lastName: cells[2]?.innerText.trim(),
                         dob: cells[3]?.innerText.trim(),
                         phone: cells[4]?.innerText.trim(),
-                        position: cells[5]?.innerText.trim() || 'Standard',
+                        position: cells[5]?.innerText.trim() || 'General',
                         type: typeValue,
                         status: 'Active'
                     };

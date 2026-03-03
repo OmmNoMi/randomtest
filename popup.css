@@ -627,24 +627,36 @@ body {
 .check-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border-radius: 8px;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.2s ease;
+    user-select: none;
 }
 
 .check-item:hover {
     background: var(--bg-hover);
 }
 
-.check-item input {
+.check-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
     accent-color: var(--primary);
 }
 
 .check-label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 500;
+    color: var(--text);
+    flex: 1;
+}
+
+.check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 /* BATCH ACTIONS */
