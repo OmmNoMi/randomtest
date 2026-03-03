@@ -264,9 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const statuses = [...new Set(allEmployees.map(e => (e.status || 'Active').trim()))].sort();
         const types = [...new Set(allEmployees.map(e => (e.type || 'Not Specified').trim()))].sort();
 
-        // If this is a fresh load (no saved filters) and selection is empty
-        // We want to default to selecting ALL available types
-        if (!filtersLoaded && selectedTypes.size === 0) {
+        // Default to selecting ALL available types if none are selected
+        // Covers fresh loads, resets, and recovering from the empty-state bug
+        if (selectedTypes.size === 0) {
             types.forEach(t => selectedTypes.add(t));
         }
 
@@ -344,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selCheck) selCheck.checked = true;
         if (unselCheck) unselCheck.checked = true;
         filtersLoaded = false; // Allow re-populating types from data
-        saveFilters();
         setupFilters();
+        saveFilters();
         renderUI();
     });
 
@@ -416,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedCountLabel) selectedCountLabel.innerText = availableCount;
         if (footerSelectedCount) footerSelectedCount.innerText = availableCount;
         if (totalCountLabel) totalCountLabel.innerText = allEmployees.length;
+        const footerAllCount = document.getElementById('footer-all-count');
+        if (footerAllCount) footerAllCount.innerText = allEmployees.length;
 
         if (mainEmployeeList) {
             renderEmployees(filtered);
@@ -490,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SELECTION ACTION ---
     selectRandomBtn.addEventListener('click', () => {
         const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
-        const count = parseInt(randomCountInput.value) || 1;
+        const count = randomCountInput ? (parseInt(randomCountInput.value) || 1) : 1;
 
         if (pool.length === 0) {
             alert('No employees selected for selection. Please include some common employees in the pool.');

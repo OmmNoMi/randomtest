@@ -99,16 +99,19 @@ body {
 /* HEADER */
 .main-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    gap: 16px;
 }
 
 .header-branding {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-shrink: 1;
+    flex-shrink: 0;
+    order: 1;
 }
 
 .logo-box {
@@ -149,6 +152,8 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    order: 2;
+    margin-left: auto;
 }
 
 .icon-btn-border {
@@ -221,6 +226,8 @@ body {
     background: var(--bg-toolbar);
     border: 1px solid var(--border-color);
     border-radius: 16px;
+    order: 3;
+    width: 100%;
 }
 
 @media screen and (min-width: 450px) {
@@ -243,9 +250,18 @@ body {
 
 @media screen and (min-width: 800px) {
     .context-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
-        padding: 12px;
+        padding: 5px 12px;
+        order: 2;
+        width: auto;
+        flex: 1;
+        margin: 0 24px;
+    }
+
+    .header-actions {
+        order: 3;
+        margin-left: 0;
     }
 }
 
@@ -941,46 +957,102 @@ body {
     gap: 16px;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 600px) {
     .workspace-footer {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
     }
+
+    .export-widget {
+        order: 1;
+        width: auto;
+    }
+
+    .selection-action {
+        order: 2;
+        width: auto !important;
+    }
+
+    .selection-action .w-full {
+        width: auto !important;
+        padding-left: 32px;
+        padding-right: 32px;
+    }
 }
 
-.export-actions {
+.w-full {
+    width: 100%;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.selection-action {
     display: flex;
     gap: 8px;
 }
 
-.footer-btn {
+.export-widget {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    color: var(--text-primary);
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.export-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.8rem;
     font-weight: 700;
-    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.export-buttons-inline {
     display: flex;
     align-items: center;
     gap: 8px;
+    background: var(--bg-card);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.export-buttons-inline .sep {
+    color: var(--border-color);
+    font-size: 0.8rem;
+    user-select: none;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
     transition: all 0.2s;
+    padding: 4px 6px;
+    border-radius: 6px;
 }
 
-.footer-btn:hover {
+.link-btn:hover {
+    color: var(--text-primary);
     background: var(--bg-hover);
-    border-color: var(--border-hover);
 }
 
-.footer-btn.accent {
+.link-btn.accent {
+    color: var(--text-primary);
+}
+
+.link-btn.accent:hover {
     color: var(--accent-emerald);
-    border-color: rgba(16, 185, 129, 0.2);
-}
-
-.footer-btn.accent:hover {
-    background: rgba(16, 185, 129, 0.1);
 }
 
 .selection-action {
@@ -1098,12 +1170,13 @@ body {
 /* FOOTER */
 .app-footer {
     text-align: center;
-    margin-top: 24px;
+    padding: 8px 0 16px 0;
+    background: var(--bg-footer);
 }
 
 .app-footer p {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: 0.65rem;
+    font-weight: 800;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
