@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadAllCsvBtn = document.getElementById('download-all-csv');
     const downloadPoolCsvBtn = document.getElementById('download-pool-csv');
     const downloadWinnersCsvBtn = document.getElementById('download-winners-csv');
+    const downloadRandomCsvBtn = document.getElementById('download-random-csv');
     const rescanBtn = document.getElementById('rescan-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const expandBtn = document.getElementById('expand-btn');
@@ -34,25 +35,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalCountLabel = document.getElementById('total-count-label');
     const footerSelectedCount = document.getElementById('footer-selected-count');
     const visibleCountLabel = document.getElementById('visible-count');
-    const viewportBanner = document.getElementById('viewport-banner');
 
-    const randomCountInput = document.getElementById('random-count');
+    // Random results panel elements
+    const poolToolbar = document.getElementById('pool-toolbar');
+    const randomResultsPanel = document.getElementById('random-results-panel');
+    const randomEmployeeList = document.getElementById('random-employee-list');
+    const randomResultsTitle = document.getElementById('random-results-title');
+    const randomResultsSubtitle = document.getElementById('random-results-subtitle');
+    const randomConfigStrip = document.getElementById('random-config-strip');
+    const backToPoolBtn = document.getElementById('back-to-pool-btn');
+    const randomExportSep = document.getElementById('random-export-sep');
+    const footerRandomCount = document.getElementById('footer-random-count');
+
+    // Modal elements
+    const randomizeModal = document.getElementById('randomize-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const annualPctSlider = document.getElementById('annual-pct-slider');
+    const annualPctInput = document.getElementById('annual-pct-input');
+    const modalPoolCount = document.getElementById('modal-pool-count');
+    const modalAnnualTarget = document.getElementById('modal-annual-target');
+    const modalCycleCount = document.getElementById('modal-cycle-count');
+    const modalRatioCycle = document.getElementById('modal-ratio-cycle');
+    const modalRatioPool = document.getElementById('modal-ratio-pool');
 
     // --- STATE ---
     let allEmployees = [];
     let selectedWinners = [];
+    let randomizedList = [];   // current random selection
     let excludedIds = new Set();
     let selectedStatuses = new Set(['Active']); // Exclude Terminated by default
     let selectedTypes = new Set(); // Empty means all allowed initially
     let selectedInclusion = new Set(['Selected', 'Unselected']);
     let searchQuery = '';
     let isDarkMode = true;
-
     let filtersLoaded = false;
+
+    // Config state
+    let configPct = 25;
+    let configFrequency = { label: 'Annually', freq: 'annually', cycles: 1 };
+    let isRandomView = false;
 
     // --- INITIALIZATION ---
     async function init() {
-        // Load theme
         const themeStore = await chrome.storage.local.get(['theme']);
         if (themeStore.theme === 'light') {
             document.body.classList.remove('dark-mode');
@@ -61,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateThemeUI();
         }
 
-        // Load data
         const storage = await chrome.storage.local.get(['allEmployees', 'removedIds', 'lastScan', 'rt_scan_state', 'filterStore']);
 
         if (storage.filterStore) {
@@ -72,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.value = searchQuery;
             filtersLoaded = true;
 
-            // Update UI for inclusion filters since they aren't dynamic
             const selCheck = document.getElementById('filter-selected');
             const unselCheck = document.getElementById('filter-unselected');
             if (selCheck) selCheck.checked = selectedInclusion.has('Selected');
@@ -211,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allEmployees = [];
             excludedIds = new Set();
             selectedWinners = [];
+            randomizedList = [];
 
             setupView.classList.remove('hidden');
             selectionView.classList.add('hidden');
@@ -218,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             progressBar.style.width = '0%';
             setScanningUI(false);
+            exitRandomView();
             buildBtn.click();
         }
     });
@@ -232,7 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (message.type === 'extraction_complete') {
             allEmployees = message.data;
 
-            // Auto-exclude Terminated on first scan
             excludedIds = new Set();
             allEmployees.forEach(emp => {
                 if ((emp.status || '').toLowerCase().includes('terminated')) {
@@ -260,12 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FILTER SETUP ---
     function setupFilters() {
-        // Collect all unique statuses and types, ensuring we handle blanks consistently
         const statuses = [...new Set(allEmployees.map(e => (e.status || 'Active').trim()))].sort();
         const types = [...new Set(allEmployees.map(e => (e.type || 'Not Specified').trim()))].sort();
 
-        // Default to selecting ALL available types if none are selected
-        // Covers fresh loads, resets, and recovering from the empty-state bug
         if (selectedTypes.size === 0) {
             types.forEach(t => selectedTypes.add(t));
         }
@@ -280,7 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         options.forEach(opt => {
             const label = document.createElement('label');
             label.className = 'check-item';
-            // Ensure we check the active set case-insensitively or exactly as saved
             const isChecked = activeSet.has(opt);
             label.innerHTML = `
                 <input type="checkbox" ${isChecked ? 'checked' : ''} data-val="${opt}">
@@ -290,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Delegated listener for filter groups
     [statusFilterOptions, typeFilterOptions, inclusionFilterOptions].forEach(container => {
         if (!container) return;
         container.addEventListener('change', (e) => {
@@ -330,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeFilterCount) activeFilterCount.innerText = totalFilters;
     }
 
-    // --- DROPDOWN CONTROL ---
     resetFiltersBtn.addEventListener('click', () => {
         selectedStatuses = new Set(['Active']);
         selectedTypes = new Set();
@@ -338,12 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         searchQuery = '';
         searchInput.value = '';
 
-        // UI Reset for static filters
         const selCheck = document.getElementById('filter-selected');
         const unselCheck = document.getElementById('filter-unselected');
         if (selCheck) selCheck.checked = true;
         if (unselCheck) unselCheck.checked = true;
-        filtersLoaded = false; // Allow re-populating types from data
+        filtersLoaded = false;
         setupFilters();
         saveFilters();
         renderUI();
@@ -358,18 +376,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filterMenu && !filterMenu.contains(e.target)) {
             filterMenu.classList.add('hidden');
         }
+        // Also close modal if clicking backdrop
+        if (e.target === randomizeModal) {
+            closeModal();
+        }
     });
 
     // --- GLOBAL KEYBOARD SHORTCUTS ---
     document.addEventListener('keydown', (e) => {
-        // "/" shortcut to focus search
+        if (e.key === 'Escape') {
+            closeModal();
+            filterMenu.classList.add('hidden');
+        }
         const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
         if (e.key === '/' && !isTyping) {
             e.preventDefault();
             searchInput.focus();
-            if (searchInput.value.length > 0) {
-                searchInput.select(); // Highlight existing text
-            }
+            if (searchInput.value.length > 0) searchInput.select();
         }
     });
 
@@ -381,24 +404,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function getFilteredList() {
-        // Create normalized sets for fast case-insensitive lookup
         const normStatuses = new Set([...selectedStatuses].map(s => s.toLowerCase().trim()));
         const normTypes = new Set([...selectedTypes].map(t => t.toLowerCase().trim()));
 
         return allEmployees.filter(emp => {
-            // Text Search
             const name = `${emp.firstName} ${emp.lastName}`.toLowerCase();
             if (searchQuery && !name.includes(searchQuery)) return false;
 
-            // Status Filter (Normalized)
             const eStatus = (emp.status || 'Active').toLowerCase().trim();
             if (!normStatuses.has(eStatus)) return false;
 
-            // Type Filter (Normalized)
             const eType = (emp.type || 'Not Specified').toLowerCase().trim();
             if (!normTypes.has(eType)) return false;
 
-            // Inclusion Filter
             const isExcluded = excludedIds.has(emp.uniqueKey);
             if (isExcluded && !selectedInclusion.has('Unselected')) return false;
             if (!isExcluded && !selectedInclusion.has('Selected')) return false;
@@ -411,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = getFilteredList();
         const availableCount = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey)).length;
 
-        // Update Labels with defensive checks
         if (visibleCountLabel) visibleCountLabel.innerText = filtered.length;
         if (selectedCountLabel) selectedCountLabel.innerText = availableCount;
         if (footerSelectedCount) footerSelectedCount.innerText = availableCount;
@@ -489,43 +506,254 @@ document.addEventListener('DOMContentLoaded', () => {
         renderUI();
     });
 
-    // --- SELECTION ACTION ---
+    // ================================================================
+    // RANDOMIZE MODAL LOGIC
+    // ================================================================
+
+    // Open modal on Randomize click
     selectRandomBtn.addEventListener('click', () => {
         const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
-        const count = randomCountInput ? (parseInt(randomCountInput.value) || 1) : 1;
-
         if (pool.length === 0) {
-            alert('No employees selected for selection. Please include some common employees in the pool.');
+            alert('No employees in pool. Please include at least one employee before randomizing.');
             return;
         }
-
-        const shuffled = [...pool].sort(() => 0.5 - Math.random());
-        selectedWinners = shuffled.slice(0, Math.min(count, pool.length));
-
-        showWinners(selectedWinners);
+        openModal(pool.length);
     });
 
-    function showWinners(winners) {
-        winnerList.innerHTML = '';
-        winners.forEach((emp, index) => {
-            const card = document.createElement('div');
-            card.className = 'winner-card';
-            card.innerHTML = `
-                <p class="label">#${index + 1}</p>
-                <h4>${emp.firstName} ${emp.lastName}</h4>
-                <p>${emp.organization} | ${emp.type}</p>
-                <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                    <span class="tag">DOB: ${emp.dob}</span>
-                    <span class="tag">${emp.phone || ''}</span>
-                </div>
-            `;
-            winnerList.appendChild(card);
-        });
-
-        selectionView.classList.add('hidden');
-        winnerView.classList.remove('hidden');
+    function openModal(poolSize) {
+        randomizeModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        updateModalCalculations(poolSize);
     }
 
+    function closeModal() {
+        randomizeModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalCancelBtn.addEventListener('click', closeModal);
+
+    // ---- Percent Preset Buttons ----
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pct = parseInt(btn.dataset.pct);
+            configPct = pct;
+            annualPctSlider.value = pct;
+            annualPctInput.value = pct;
+            syncSliderBackground(pct);
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateModalCalculations();
+        });
+    });
+
+    // ---- Slider ----
+    annualPctSlider.addEventListener('input', () => {
+        const val = parseInt(annualPctSlider.value);
+        configPct = val;
+        annualPctInput.value = val;
+        syncSliderBackground(val);
+        // Update preset active state
+        document.querySelectorAll('.preset-btn').forEach(b => {
+            b.classList.toggle('active', parseInt(b.dataset.pct) === val);
+        });
+        updateModalCalculations();
+    });
+
+    // ---- Number Input ----
+    annualPctInput.addEventListener('input', () => {
+        let val = parseInt(annualPctInput.value) || 1;
+        val = Math.min(100, Math.max(1, val));
+        configPct = val;
+        annualPctSlider.value = val;
+        syncSliderBackground(val);
+        document.querySelectorAll('.preset-btn').forEach(b => {
+            b.classList.toggle('active', parseInt(b.dataset.pct) === val);
+        });
+        updateModalCalculations();
+    });
+
+    function syncSliderBackground(pct) {
+        annualPctSlider.style.setProperty('--slider-pct', `${pct}%`);
+        // Also set via background directly for cross-browser
+        annualPctSlider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--bg-hover) ${pct}%, var(--bg-hover) 100%)`;
+    }
+
+    // ---- Frequency Buttons ----
+    document.querySelectorAll('.freq-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            configFrequency = {
+                label: btn.querySelector('.freq-name').textContent,
+                freq: btn.dataset.freq,
+                cycles: parseInt(btn.dataset.cycles)
+            };
+            updateModalCalculations();
+        });
+    });
+
+    function updateModalCalculations(poolSize) {
+        if (poolSize === undefined) {
+            poolSize = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey)).length;
+        }
+
+        const annualTarget = Math.ceil((poolSize * configPct) / 100);
+        const cycleCount = Math.ceil(annualTarget / configFrequency.cycles);
+
+        // Update pool strip cards
+        if (modalPoolCount) modalPoolCount.innerText = poolSize;
+        if (modalAnnualTarget) modalAnnualTarget.innerText = annualTarget;
+        if (modalCycleCount) modalCycleCount.innerText = cycleCount;
+
+        // Update ratio card (4th card: "X of Y")
+        if (modalRatioCycle) modalRatioCycle.innerText = cycleCount;
+        if (modalRatioPool) modalRatioPool.innerText = poolSize;
+    }
+
+    // ---- Confirm -> Generate Random List ----
+    modalConfirmBtn.addEventListener('click', () => {
+        const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
+        const annualTarget = Math.ceil((pool.length * configPct) / 100);
+        const cycleCount = Math.max(1, Math.ceil(annualTarget / configFrequency.cycles));
+
+        // Fisher-Yates shuffle
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        randomizedList = shuffled.slice(0, Math.min(cycleCount, pool.length));
+
+        closeModal();
+        showRandomResults(randomizedList, pool.length, annualTarget, cycleCount);
+    });
+
+    // ================================================================
+    // RANDOM RESULTS VIEW
+    // ================================================================
+
+    function showRandomResults(list, poolSize, annualTarget, cycleCount) {
+        isRandomView = true;
+
+        // Hide pool toolbar & employee list
+        if (poolToolbar) poolToolbar.classList.add('hidden');
+        if (mainEmployeeList) mainEmployeeList.classList.add('hidden');
+
+        // Show random results panel
+        if (randomResultsPanel) randomResultsPanel.classList.remove('hidden');
+
+        // Update header text
+        if (randomResultsTitle) randomResultsTitle.innerText = `${cycleCount} Employee${cycleCount !== 1 ? 's' : ''} Selected`;
+        if (randomResultsSubtitle) randomResultsSubtitle.innerText = `${configFrequency.label} • ${configPct}% Annual Rate • Lab Passport Generation`;
+
+        // Populate config strip
+        if (randomConfigStrip) {
+            randomConfigStrip.innerHTML = `
+                <span class="config-chip"><span class="chip-label">Pool</span><span class="chip-value">${poolSize}</span></span>
+                <span class="config-chip"><span class="chip-label">Annual Rate</span><span class="chip-value">${configPct}%</span></span>
+                <span class="config-chip"><span class="chip-label">Annual Target</span><span class="chip-value">${annualTarget}</span></span>
+                <span class="config-chip"><span class="chip-label">Frequency</span><span class="chip-value">${configFrequency.label}</span></span>
+                <span class="config-chip"><span class="chip-label">This Cycle</span><span class="chip-value">${cycleCount}</span></span>
+            `;
+        }
+
+        // Render passport cards
+        renderPassportCards(list);
+
+        // Show Random export button + update count
+        if (downloadRandomCsvBtn) downloadRandomCsvBtn.classList.remove('hidden');
+        if (randomExportSep) randomExportSep.classList.remove('hidden');
+        if (footerRandomCount) footerRandomCount.innerText = list.length;
+
+        // Update Randomize button to say "Re-Randomize"
+        if (selectRandomBtn) {
+            selectRandomBtn.innerHTML = `
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+                    <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+                    <line x1="4" y1="4" x2="9" y2="9"/>
+                </svg>
+                Re-Randomize
+            `;
+        }
+    }
+
+    function renderPassportCards(list) {
+        if (!randomEmployeeList) return;
+        randomEmployeeList.innerHTML = '';
+
+        list.forEach((emp, index) => {
+            const statusClass = (emp.status || '').toLowerCase().includes('active') ? 'status-active' : 'status-terminated';
+
+            const card = document.createElement('div');
+            card.className = 'passport-card';
+            card.innerHTML = `
+                <span class="passport-card-index">#${index + 1}</span>
+                <div class="passport-card-name">${emp.firstName} ${emp.lastName}</div>
+                <div class="passport-card-tags">
+                    <span class="tag">${emp.position || 'Standard'}</span>
+                    <div class="tag-dot"></div>
+                    <span class="tag">${emp.type}</span>
+                    <div class="tag-dot"></div>
+                    <span class="status-badge ${statusClass}">${emp.status}</span>
+                </div>
+                ${emp.email ? `<div class="tag" style="font-size:0.58rem; color:var(--text-muted); margin-top:-2px;">${emp.email}</div>` : ''}
+                <div class="passport-card-actions">
+                    <button class="passport-btn btn-passport" title="Create Lab Passport for ${emp.firstName} ${emp.lastName}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <line x1="9" y1="15" x2="15" y2="15"/>
+                        </svg>
+                        Create Lab Passport
+                    </button>
+                </div>
+            `;
+
+            // Passport button click (placeholder)
+            card.querySelector('.btn-passport').addEventListener('click', () => {
+                // Functionality to be implemented later
+                console.log('Create Lab Passport for:', emp.firstName, emp.lastName, emp);
+            });
+
+            randomEmployeeList.appendChild(card);
+        });
+    }
+
+    function exitRandomView() {
+        isRandomView = false;
+
+        // Show pool toolbar & employee list
+        if (poolToolbar) poolToolbar.classList.remove('hidden');
+        if (mainEmployeeList) mainEmployeeList.classList.remove('hidden');
+
+        // Hide random results panel
+        if (randomResultsPanel) randomResultsPanel.classList.add('hidden');
+
+        // Hide random export button
+        if (downloadRandomCsvBtn) downloadRandomCsvBtn.classList.add('hidden');
+        if (randomExportSep) randomExportSep.classList.add('hidden');
+
+        // Restore Randomize button label
+        if (selectRandomBtn) {
+            selectRandomBtn.innerHTML = `
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+                    <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+                    <line x1="4" y1="4" x2="9" y2="9"/>
+                </svg>
+                Randomize
+            `;
+        }
+    }
+
+    // Back to pool button
+    if (backToPoolBtn) {
+        backToPoolBtn.addEventListener('click', () => {
+            exitRandomView();
+        });
+    }
+
+    // Legacy reset button (winner view)
     resetBtn.addEventListener('click', () => {
         winnerView.classList.add('hidden');
         selectionView.classList.remove('hidden');
@@ -534,7 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CSV ENGINE ---
     function downloadCSV(data, filename) {
         if (!data.length) return;
-        // Include BOM for Excel
         const BOM = '\uFEFF';
         const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position'];
         const rows = data.map(e => [
@@ -555,7 +782,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
         downloadCSV(pool, 'Labb_Selected_Selection_Pool');
     });
-    downloadWinnersCsvBtn.addEventListener('click', () => downloadCSV(selectedWinners, 'Random_Testing_Results'));
+    if (downloadWinnersCsvBtn) {
+        downloadWinnersCsvBtn.addEventListener('click', () => downloadCSV(selectedWinners, 'Random_Testing_Results'));
+    }
+    if (downloadRandomCsvBtn) {
+        downloadRandomCsvBtn.addEventListener('click', () => {
+            const freq = configFrequency.label.replace(/[^a-zA-Z]/g, '_');
+            downloadCSV(randomizedList, `Random_Selection_${configPct}pct_${freq}`);
+        });
+    }
 
     // --- UTILS ---
     function showInfoBanner(meta) {
@@ -568,6 +803,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (orgIdEl) orgIdEl.innerText = meta.orgId || '---';
         if (userEl) userEl.innerText = meta.userName || '---';
     }
+
+    // Initialize slider background on load
+    syncSliderBackground(configPct);
 
     init();
 });

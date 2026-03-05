@@ -56,7 +56,7 @@
                         <span class="theme-icon mode-dark">☀️</span>
                         <span class="theme-icon mode-light hidden">🌙</span>
                     </button>
-                    <button id="rescan-btn" class="icon-btn-border" title="Clear & Rescan Now">
+                    <button id="rescan-btn" class="icon-btn-border" title="Clear &amp; Rescan Now">
                         <svg class="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path
@@ -97,8 +97,8 @@
                 <!-- SELECTION VIEW -->
                 <div id="selection-view" class="workspace-content hidden">
 
-                    <!-- Integrated Header & Control Toolbar -->
-                    <div class="integrated-toolbar">
+                    <!-- Integrated Header & Control Toolbar (hidden when random view active) -->
+                    <div id="pool-toolbar" class="integrated-toolbar">
 
                         <!-- Top Row: Title & Selection Summary -->
                         <div class="toolbar-header">
@@ -213,98 +213,281 @@
                         </div>
 
                     </div>
-                </div>
 
-                <!-- Employee List -->
-                <div id="main-employee-list" class="employee-list-container custom-scrollbar">
-                    <!-- List items here -->
-                    <div class="empty-state hidden">
-                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    <!-- Employee Master Pool List -->
+                    <div id="main-employee-list" class="employee-list-container custom-scrollbar">
+                        <!-- List items here -->
+                        <div class="empty-state hidden">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                            </svg>
+                            <p class="empty-title">No employees found</p>
+                            <p class="empty-hint">Try adjusting your search or filters.</p>
+                        </div>
+                    </div>
+
+                    <!-- RANDOM RESULTS PANEL (shown after config confirmed, hides toolbar + pool list) -->
+                    <div id="random-results-panel" class="random-results-panel hidden">
+                        <!-- Header of random results -->
+                        <div class="random-results-header">
+                            <div class="random-results-title-group">
+                                <div class="random-results-badge">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="16 3 21 3 21 8" />
+                                        <line x1="4" y1="20" x2="21" y2="3" />
+                                        <polyline points="21 16 21 21 16 21" />
+                                        <line x1="15" y1="15" x2="21" y2="21" />
+                                        <line x1="4" y1="4" x2="9" y2="9" />
+                                    </svg>
+                                    Randomly Selected
+                                </div>
+                                <div class="random-results-meta">
+                                    <h2 id="random-results-title">Selected Employees</h2>
+                                    <p id="random-results-subtitle" class="hint">Lab Passport Generation List</p>
+                                </div>
+                            </div>
+                            <button id="back-to-pool-btn" class="back-pool-btn" title="Back to Employee Pool">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="19" y1="12" x2="5" y2="12" />
+                                    <polyline points="12 19 5 12 12 5" />
+                                </svg>
+                                Back to Pool
+                            </button>
+                        </div>
+
+                        <!-- Config Summary Strip -->
+                        <div id="random-config-strip" class="random-config-strip">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <!-- Random Employee Cards -->
+                        <div id="random-employee-list" class="random-employee-list custom-scrollbar">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- WORKSPACE FOOTER -->
+                    <div class="workspace-footer">
+                        <div class="selection-action w-full justify-center">
+                            <button id="select-random-btn" class="run-btn w-full justify-center">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="16 3 21 3 21 8" />
+                                    <line x1="4" y1="20" x2="21" y2="3" />
+                                    <polyline points="21 16 21 21 16 21" />
+                                    <line x1="15" y1="15" x2="21" y2="21" />
+                                    <line x1="4" y1="4" x2="9" y2="9" />
+                                </svg>
+                                Randomize
+                            </button>
+                        </div>
+
+                        <div class="export-widget">
+                            <div class="export-label">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Export
+                            </div>
+                            <div class="export-buttons-inline">
+                                <button id="download-all-csv" class="link-btn">All (<span
+                                        id="footer-all-count">0</span>)</button>
+                                <span class="sep">|</span>
+                                <button id="download-pool-csv" class="link-btn accent">Selected (<span
+                                        id="footer-selected-count">0</span>)</button>
+                                <!-- Random export button — shown only when random results are visible -->
+                                <span id="random-export-sep" class="sep hidden">|</span>
+                                <button id="download-random-csv" class="link-btn random-export-btn hidden">Random (<span
+                                        id="footer-random-count">0</span>)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="app-footer">
+                        <p>OmmNoMi Random Selection Utility • v2.0</p>
+                    </div>
+                </div>
+        </div>
+
+        <!-- WINNER VIEW (legacy, kept for compatibility) -->
+        <div id="winner-view" class="workspace-content hidden">
+            <div class="winner-congratulations">
+                <div class="status-badge-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Selection Complete
+                </div>
+                <h3>Selected Employees</h3>
+            </div>
+
+            <div id="winner-list" class="winner-grid custom-scrollbar">
+                <!-- Winner cards here -->
+            </div>
+
+            <div class="winner-footer">
+                <button id="download-winners-csv" class="run-btn">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Export Results (CSV)
+                </button>
+                <button id="reset-btn" class="footer-btn">Start New Selection</button>
+            </div>
+            <div class="app-footer">
+                <p>OmmNoMi Random Selection Utility • v2.0</p>
+            </div>
+        </div>
+
+        </main>
+    </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RANDOMIZE CONFIG MODAL                                        -->
+    <!-- ============================================================ -->
+    <div id="randomize-modal" class="modal-overlay hidden">
+        <div class="modal-panel">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="modal-header-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 3 21 3 21 8" />
+                        <line x1="4" y1="20" x2="21" y2="3" />
+                        <polyline points="21 16 21 21 16 21" />
+                        <line x1="15" y1="15" x2="21" y2="21" />
+                        <line x1="4" y1="4" x2="9" y2="9" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="modal-title">Configure Random Selection</h3>
+                    <p class="modal-subtitle">Set testing parameters to generate your passport list</p>
+                </div>
+                <button id="modal-close-btn" class="modal-close-btn" title="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Pool Info Strip -->
+            <div class="modal-pool-strip">
+                <div class="pool-stat">
+                    <span class="pool-stat-value" id="modal-pool-count">0</span>
+                    <span class="pool-stat-label">Employees in Pool</span>
+                </div>
+                <div class="pool-stat-divider"></div>
+                <div class="pool-stat">
+                    <span class="pool-stat-value accent" id="modal-annual-target">0</span>
+                    <span class="pool-stat-label">Annual Target</span>
+                </div>
+                <div class="pool-stat-divider"></div>
+                <div class="pool-stat">
+                    <span class="pool-stat-value highlight" id="modal-cycle-count">0</span>
+                    <span class="pool-stat-label">This Cycle</span>
+                </div>
+                <div class="pool-stat-divider"></div>
+                <div class="pool-stat">
+                    <span class="pool-stat-value ratio-value" id="modal-ratio-display">
+                        <span id="modal-ratio-cycle">0</span><span class="ratio-sep"> of </span><span
+                            id="modal-ratio-pool">0</span>
+                    </span>
+                    <span class="pool-stat-label">Selected / Pool</span>
+                </div>
+            </div>
+
+            <!-- Config Fields -->
+            <div class="modal-body">
+
+                <!-- Annual Testing % -->
+                <div class="config-field">
+                    <label class="config-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="5" x2="5" y2="19" />
+                            <circle cx="6.5" cy="6.5" r="2.5" />
+                            <circle cx="17.5" cy="17.5" r="2.5" />
                         </svg>
-                        <p class="empty-title">No employees found</p>
-                        <p class="empty-hint">Try adjusting your search or filters.</p>
+                        Annual Testing Rate
+                    </label>
+                    <p class="config-hint">Percentage of the pool tested annually per DOT guidelines</p>
+                    <div class="percent-slider-group">
+                        <div class="percent-presets">
+                            <button class="preset-btn active" data-pct="25">25%</button>
+                            <button class="preset-btn" data-pct="50">50%</button>
+                            <button class="preset-btn" data-pct="60">60%</button>
+                            <button class="preset-btn" data-pct="75">75%</button>
+                            <button class="preset-btn" data-pct="100">100%</button>
+                        </div>
+                        <div class="custom-pct-row">
+                            <input type="range" id="annual-pct-slider" min="1" max="100" value="25" class="pct-slider">
+                            <div class="pct-input-box">
+                                <input type="number" id="annual-pct-input" min="1" max="100" value="25">
+                                <span class="pct-symbol">%</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- WORKSPACE FOOTER -->
-                <div class="workspace-footer">
-                    <div class="selection-action w-full justify-center">
-                        <button id="select-random-btn" class="run-btn w-full justify-center">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="16 3 21 3 21 8" />
-                                <line x1="4" y1="20" x2="21" y2="3" />
-                                <polyline points="21 16 21 21 16 21" />
-                                <line x1="15" y1="15" x2="21" y2="21" />
-                                <line x1="4" y1="4" x2="9" y2="9" />
-                            </svg>
-                            Randomize
+                <!-- Frequency -->
+                <div class="config-field">
+                    <label class="config-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        Testing Frequency
+                    </label>
+                    <p class="config-hint">How often selection cycles occur throughout the year</p>
+                    <div class="frequency-grid">
+                        <button class="freq-btn active" data-freq="annually" data-cycles="1">
+                            <span class="freq-name">Annually</span>
+                            <span class="freq-cycles">1 cycle / yr</span>
+                        </button>
+                        <button class="freq-btn" data-freq="half-yearly" data-cycles="2">
+                            <span class="freq-name">Half-Yearly</span>
+                            <span class="freq-cycles">2 cycles / yr</span>
+                        </button>
+                        <button class="freq-btn" data-freq="quarterly" data-cycles="4">
+                            <span class="freq-name">Quarterly</span>
+                            <span class="freq-cycles">4 cycles / yr</span>
+                        </button>
+                        <button class="freq-btn" data-freq="monthly" data-cycles="12">
+                            <span class="freq-name">Monthly</span>
+                            <span class="freq-cycles">12 cycles / yr</span>
                         </button>
                     </div>
-
-                    <div class="export-widget">
-                        <div class="export-label">
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
-                            Export
-                        </div>
-                        <div class="export-buttons-inline">
-                            <button id="download-all-csv" class="link-btn">All (<span
-                                    id="footer-all-count">0</span>)</button>
-                            <span class="sep">|</span>
-                            <button id="download-pool-csv" class="link-btn accent">Selected (<span
-                                    id="footer-selected-count">0</span>)</button>
-                        </div>
-                    </div>
                 </div>
-                <div class="app-footer">
-                    <p>OmmNoMi Random Selection Utility • v2.0</p>
-                </div>
-        </div>
-    </div>
 
-    <!-- WINNER VIEW -->
-    <div id="winner-view" class="workspace-content hidden">
-        <div class="winner-congratulations">
-            <div class="status-badge-success">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Selection Complete
+
             </div>
-            <h3>Selected Employees</h3>
-        </div>
 
-        <div id="winner-list" class="winner-grid custom-scrollbar">
-            <!-- Winner cards here -->
-        </div>
-
-        <div class="winner-footer">
-            <button id="download-winners-csv" class="run-btn">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Export Results (CSV)
-            </button>
-            <button id="reset-btn" class="footer-btn">Start New Selection</button>
-        </div>
-        <div class="app-footer">
-            <p>OmmNoMi Random Selection Utility • v2.0</p>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button id="modal-cancel-btn" class="modal-cancel-btn">Cancel</button>
+                <button id="modal-confirm-btn" class="modal-confirm-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 3 21 3 21 8" />
+                        <line x1="4" y1="20" x2="21" y2="3" />
+                        <polyline points="21 16 21 21 16 21" />
+                        <line x1="15" y1="15" x2="21" y2="21" />
+                        <line x1="4" y1="4" x2="9" y2="9" />
+                    </svg>
+                    Generate Random List
+                </button>
+            </div>
         </div>
     </div>
 
-    </main>
-    </div>
-    </div>
     <script src="popup.js"></script>
 </body>
 
