@@ -812,18 +812,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
 
-        document.body.appendChild(a);
-        a.click();
-
-        // Clean up
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
+        // Use Chrome Downloads API to ensure correct filename and extension
+        chrome.downloads.download({
+            url: url,
+            filename: `${filename}_${new Date().toISOString().split('T')[0]}.csv`,
+            saveAs: false
+        }, () => {
+            // Clean up memory after browser processes the download
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        });
     }
 
     downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
