@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function startDataExtraction() {
-        console.log('RandomTesting: Starting data extraction...');
+        console.log('RandomizePro: Starting data extraction...');
         setScanningUI(true);
         if (statusText) statusText.innerText = 'Initializing extraction...';
 
@@ -204,22 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tab = await getLabbTab();
         if (!tab) {
-            console.error('RandomTesting: No Labb tab found');
+            console.error('RandomizePro: No Labb tab found');
             if (statusText) statusText.innerText = 'Error: LabbReport page not found.';
             setScanningUI(false);
             return;
         }
 
-        console.log('RandomTesting: Sending PING to tab', tab.id);
+        console.log('RandomizePro: Sending PING to tab', tab.id);
         chrome.tabs.sendMessage(tab.id, { action: 'PING' }, (response) => {
             if (chrome.runtime.lastError || !response) {
-                console.log('RandomTesting: PING failed, injecting script...');
+                console.log('RandomizePro: PING failed, injecting script...');
                 chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }, () => {
-                    console.log('RandomTesting: Script injected, sending START_EXTRACTION');
+                    console.log('RandomizePro: Script injected, sending START_EXTRACTION');
                     chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
                 });
             } else {
-                console.log('RandomTesting: PING success, sending START_EXTRACTION');
+                console.log('RandomizePro: PING success, sending START_EXTRACTION');
                 chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
             }
         });
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buildBtn.addEventListener('click', startDataExtraction);
 
     const handleRescan = async () => {
-        console.log('RandomTesting: Rescan initiated');
+        console.log('RandomizePro: Rescan initiated');
 
         // Immediate UI feedback
         setupView.classList.remove('hidden');
@@ -811,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
         csvContent += rows;
 
         const filenameWithDate = `${filename} - ${new Date().toISOString().split('T')[0]}.csv`;
-        console.log(`RandomTesting: Preparing to download CSV as: ${filenameWithDate}`);
+        console.log(`RandomizePro: Preparing to download CSV as: ${filenameWithDate}`);
 
         try {
             // BEST METHOD: File System Access API
@@ -828,13 +828,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Send the raw text data into the file stream
                 await writable.write(csvContent);
                 await writable.close();
-                console.log('RandomTesting: Saved successfully via File System Stream.');
+                console.log('RandomizePro: Saved successfully via File System Stream.');
                 return;
             }
         } catch (err) {
             // If the user simply clicked "Cancel" on the native Save dialogue, ignore.
             if (err.name === 'AbortError') return;
-            console.warn("RandomTesting: FilePicker failed, trying fallback systems:", err);
+            console.warn("RandomizePro: FilePicker failed, trying fallback systems:", err);
         }
 
         // Encode the string to Base64 to bypass Chrome's Blob UUID file naming issues
@@ -842,21 +842,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataUrl = `data:text/csv;charset=utf-8;base64,${base64data}`;
 
         if (chrome && chrome.downloads && chrome.downloads.download) {
-            console.log('RandomTesting: Triggering chrome.downloads API...');
+            console.log('RandomizePro: Triggering chrome.downloads API...');
             chrome.downloads.download({
                 url: dataUrl,
                 filename: filenameWithDate,
                 saveAs: true // FORCES the save dialog so you can verify it is a .csv
             }, (downloadId) => {
                 if (chrome.runtime.lastError) {
-                    console.error("RandomTesting: Download error:", chrome.runtime.lastError);
+                    console.error("RandomizePro: Download error:", chrome.runtime.lastError);
                     fallbackDownload(dataUrl, filenameWithDate);
                 } else {
-                    console.log("RandomTesting: Download successful with ID:", downloadId);
+                    console.log("RandomizePro: Download successful with ID:", downloadId);
                 }
             });
         } else {
-            console.warn("RandomTesting: Downloads API unavailable, using fallback.");
+            console.warn("RandomizePro: Downloads API unavailable, using fallback.");
             fallbackDownload(dataUrl, filenameWithDate);
         }
 

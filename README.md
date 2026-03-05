@@ -1,8 +1,8 @@
-# RandomTesting v2.2 (Premium Selection Engine)
+# RandomizePro v0.2 (Premium Selection Engine)
 
-A professional-grade Chrome extension designed for high-accuracy employee data extraction and randomized selection from the LabbReport platform.
+The OmmNoMi tool for Random Testing. A professional-grade Chrome extension designed for high-accuracy employee data extraction and randomized selection from the LabbReport platform.
 
-![Version 2.2](https://img.shields.io/badge/version-2.2-indigo.svg?style=for-the-badge)
+![Version 0.2](https://img.shields.io/badge/version-0.2-indigo.svg?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
 
 ## ✨ Features

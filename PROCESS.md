@@ -1,6 +1,6 @@
-# RandomTesting: Project Development Process & Documentation
+# RandomizePro: Project Development Process & Documentation
 
-This document serves as a comprehensive log of the development lifecycle, architectural decisions, and improvement roadmap for the RandomTesting Chrome Extension.
+This document serves as a comprehensive log of the development lifecycle, architectural decisions, and improvement roadmap for the RandomizePro Chrome Extension.
 
 ## 📈 Development Timeline
 
@@ -22,7 +22,7 @@ This document serves as a comprehensive log of the development lifecycle, archit
     4. **Export**: Dual-mode CSV export (Full Master vs. Filtered Selection).
 - **UI Aesthetics**: Implemented a "Premium Dark" glassmorphism theme using HSL color variables and smooth CSS transitions.
 
-### Phase 4: Modernization & Precision (v2.0)
+### Phase 4: Modernization & Precision (v0.2)
 - **Premium UI**: Overhauled design with glassmorphism, HSL variables, and dark/light modes.
 - **Improved Extraction**: Added normalization for employment types and handled "Terminated" status reliably.
 - **Robust Filtering**:
@@ -42,7 +42,7 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - **Export Improvements**: Added UTF-8 BOM to CSVs for better Excel compatibility and included employment type in exports.
 - **Streamlined Actions**: Moved export and randomize controls to the main footer for better user flow.
 
-### Phase 5: UI Polish & UX Refinements (v2.1)
+### Phase 5: UI Polish & UX Refinements (v0.2)
 - **Unified Organization Card**: Combined the separate "Organization Name" and "Org ID" context cards into a single card to reduce visual clutter. Displays as `Organization #<ID>` with the name below.
 - **Header Context on Desktop**: Moved the Organization and Current User context cards into the main header on larger screens, freeing up more vertical space for the employee list.
 - **Random Count Input Removed**: The manual count input for randomization was removed per design decision — will be handled on a dedicated settings/configuration page in a future phase.
@@ -53,7 +53,7 @@ This document serves as a comprehensive log of the development lifecycle, archit
     - Desktop layout arranges Export on the left and Randomize on the right with space between.
 - **Visible Count Badge**: Removed the verbose "Filtered: N entries shown. Batch actions apply only to this visible list." banner. Replaced with a compact count badge `[ N ]` placed inline next to the All/None batch action buttons.
 - **None Button Icon**: Updated the "None" batch action button to show a checkbox with an X (✗) instead of an empty rectangle — more clearly communicates its deselect/exclude intent.
-- **Copyright Placement**: Moved the "OMMNOMI RANDOM SELECTION UTILITY • V2.0" footer text to sit directly beneath the export row inside the workspace card, rather than floating disconnected at the bottom of the popup.
+- **Copyright Placement**: Moved the "RandomizePro: The OmmNoMi Tool for Random Testing • v0.2" footer text to sit directly beneath the export row inside the workspace card, rather than floating disconnected at the bottom of the popup.
 - **Filter Persistence Bug Fix**: Fixed a critical bug where Employment Type filters would appear unchecked every time the popup reopened. Root cause was the `!filtersLoaded` guard in `setupFilters()` preventing auto-population after the initial save. Resolved by:
     - Removing the guard condition so types are always auto-populated if the set is empty.
     - Swapping the call order in "Reset to Defaults" so `setupFilters()` runs before `saveFilters()`, ensuring the repopulated defaults are what gets written to storage.

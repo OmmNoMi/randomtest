@@ -8,7 +8,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('autoreason') !== 'random') return;
 
-    console.log('RandomTesting: Passport MAIN-WORLD Bridge Active.');
+    console.log('RandomizePro: Passport MAIN-WORLD Bridge Active.');
 
     const tryFill = () => {
         const selects = Array.from(document.querySelectorAll('select'));
@@ -25,7 +25,7 @@
         );
 
         if (randomOption && select.value !== randomOption.value) {
-            console.log('RandomTesting: Found dropdown and option. Setting value to: ' + randomOption.value);
+            console.log('RandomizePro: Found dropdown and option. Setting value to: ' + randomOption.value);
 
             // Trigger framework Native Setters
             const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;

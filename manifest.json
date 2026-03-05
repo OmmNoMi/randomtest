@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "OmmNoMi Random Selection Utility",
-    "version": "0.3",
-    "description": "Premium tool to automate employee lists and select entries for random testing.",
+    "name": "RandomizePro",
+    "version": "0.2",
+    "description": "The OmmNoMi tool for Random Testing. Premium tool to automate employee lists and select entries for random testing.",
     "permissions": [
         "activeTab",
         "scripting",

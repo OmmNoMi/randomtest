@@ -3,10 +3,10 @@
     if (window.rtEngineLoaded) return;
     window.rtEngineLoaded = true;
 
-    console.log('%c RandomTesting: Engine Initialized (v0.2) ', 'background: #333; color: orange; font-weight: bold;');
+    console.log('%c RandomizePro: Engine Initialized (v0.2) ', 'background: #333; color: orange; font-weight: bold;');
 
     if (window.location.search.includes('autoreason=random')) {
-        console.log('RandomTesting: PASSPORT PAGE DETECTED.');
+        console.log('RandomizePro: PASSPORT PAGE DETECTED.');
     }
 
     class LabbScanner {
@@ -20,7 +20,7 @@
             // Check if we need to resume a scan
             const result = await chrome.storage.local.get(['rt_scan_state']);
             if (result.rt_scan_state && result.rt_scan_state.isScanning) {
-                console.log('RandomTesting: Resuming scan from storage...');
+                console.log('RandomizePro: Resuming scan from storage...');
                 this.isScanning = true;
                 this.data = result.rt_scan_state.data || [];
                 this.metadata = result.rt_scan_state.metadata || {};
@@ -31,9 +31,9 @@
         }
 
         async start(itemsPerPage = 50) {
-            console.log('RandomTesting: Scanner.start() called with itemsPerPage:', itemsPerPage);
+            console.log('RandomizePro: Scanner.start() called with itemsPerPage:', itemsPerPage);
             if (this.isScanning) {
-                console.warn('RandomTesting: Scanner already running, skipping start');
+                console.warn('RandomizePro: Scanner already running, skipping start');
                 return;
             }
             this.isScanning = true;
@@ -52,13 +52,13 @@
                 // If no reload happened, continue
                 await this.processCurrentPage();
             } catch (err) {
-                console.error('RandomTesting: Scan failed:', err);
+                console.error('RandomizePro: Scan failed:', err);
                 this.handleError(err);
             }
         }
 
         async processCurrentPage() {
-            console.log('RandomTesting: Processing current page...');
+            console.log('RandomizePro: Processing current page...');
             try {
                 // Step 1: Scan current page
                 const pageResults = this.parseTable();
@@ -78,7 +78,7 @@
 
                 if (nextBtn) {
                     await this.saveState();
-                    console.log('RandomTesting: Moving to next page...');
+                    console.log('RandomizePro: Moving to next page...');
                     nextBtn.click();
                 } else {
                     this.finish();
@@ -132,7 +132,7 @@
 
         parseTable() {
             const rows = document.querySelectorAll('table tbody tr');
-            console.log(`RandomTesting: parseTable starting for ${rows.length} rows`);
+            console.log(`RandomizePro: parseTable starting for ${rows.length} rows`);
             const results = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
@@ -183,9 +183,9 @@
                     }
 
                     if (empId) {
-                        console.log(`RandomTesting: Found ID ${empId} for ${cells[1]?.innerText} ${cells[2]?.innerText}`);
+                        console.log(`RandomizePro: Found ID ${empId} for ${cells[1]?.innerText} ${cells[2]?.innerText}`);
                     } else {
-                        console.warn('RandomTesting: Could not find Employee ID for', cells[1]?.innerText, cells[2]?.innerText);
+                        console.warn('RandomizePro: Could not find Employee ID for', cells[1]?.innerText, cells[2]?.innerText);
                     }
 
                     const cell5Text = cells[5]?.innerText.trim() || '';
