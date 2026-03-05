@@ -775,10 +775,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function downloadCSV(data, filename) {
         if (!data.length) return;
         const BOM = '\uFEFF';
-        const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position'];
-        const rows = data.map(e => [
-            e.firstName, e.lastName, e.organization, e.type, e.dob, e.phone, e.email, e.status, e.position
-        ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','));
+        const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position', 'Passport Link'];
+        const rows = data.map(e => {
+            const orgId = currentMetadata?.orgId || '---';
+            const passportUrl = e.empId ? `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${e.empId}&organization_id=${orgId}` : '';
+            return [
+                e.firstName, e.lastName, e.organization, e.type, e.dob, e.phone, e.email, e.status, e.position, passportUrl
+            ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',');
+        });
 
         const csvContent = BOM + headers.join(',') + '\n' + rows.join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
