@@ -11,14 +11,22 @@
     console.log('RandomTesting: Passport MAIN-WORLD Bridge Active.');
 
     const tryFill = () => {
-        const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
+        const selects = Array.from(document.querySelectorAll('select'));
+        const select = document.getElementById('testing_reason') ||
+            document.querySelector('select[name="testing_reason"]') ||
+            selects.find(s => s.previousElementSibling?.innerText.includes('Testing reason'));
+
         if (!select) return;
 
-        const randomOption = Array.from(select.options).find(opt =>
-            opt.text.toLowerCase().includes('random')
+        const options = Array.from(select.options);
+        const randomOption = options.find(opt =>
+            opt.text.toLowerCase().includes('random') ||
+            opt.value.toLowerCase().includes('random')
         );
 
         if (randomOption && select.value !== randomOption.value) {
+            console.log('RandomTesting: Found dropdown and option. Setting value to: ' + randomOption.value);
+
             // Trigger framework Native Setters
             const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
             if (setter) setter.call(select, randomOption.value);
@@ -34,8 +42,6 @@
             } else if (typeof window.$ !== 'undefined') {
                 window.$(select).val(randomOption.value).trigger('change');
             }
-
-            console.log('RandomTesting: Main-world auto-fill success.');
         }
     };
 
