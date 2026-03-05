@@ -811,17 +811,32 @@ document.addEventListener('DOMContentLoaded', () => {
         csvContent += rows;
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
+        const filenameWithDate = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
 
-        // Use Chrome Downloads API to ensure correct filename and extension
-        chrome.downloads.download({
-            url: url,
-            filename: `${filename}_${new Date().toISOString().split('T')[0]}.csv`,
-            saveAs: false
-        }, () => {
-            // Clean up memory after browser processes the download
-            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-        });
+        try {
+            // Primary Method: Chrome Downloads API
+            if (chrome?.downloads?.download) {
+                const url = URL.createObjectURL(blob);
+                chrome.downloads.download({
+                    url: url,
+                    filename: filenameWithDate,
+                    saveAs: false
+                }, () => {
+                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                });
+            } else {
+                throw new Error("chrome.downloads API unavailable");
+            }
+        } catch (e) {
+            // Fallback Method: Data URI (Guarantees extension in strict environments)
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", filenameWithDate);
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => document.body.removeChild(link), 100);
+        }
     }
 
     downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
