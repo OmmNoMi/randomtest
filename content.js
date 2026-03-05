@@ -274,85 +274,64 @@
 
     // --- Passport Auto-Fill Engine --- 
     function setupPassportAutoFill() {
-        if (!window.location.pathname.includes('/labbPassport/create')) return;
+        // Use a broader check for the URL
+        if (!window.location.href.includes('labbPassport/create')) return;
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('autoreason') === 'random') {
             console.log('RandomTesting: Auto-fill engine primed for Passport.');
 
-            // Injecting directly into the Main Page Context to bypass Extension Isolation.
-            // This allows us to talk to the page's native frameworks directly.
             const script = document.createElement('script');
             script.textContent = `
                 (function() {
-                    let attempts = 0;
-                    const tryFill = () => {
-                        attempts++;
-                        let found = false;
-
-                        // Identify the target dropdown by its associated label
-                        const labels = Array.from(document.querySelectorAll('label'));
-                        const targetLabel = labels.find(l => l.innerText.toLowerCase().includes('testing reason'));
-                        
-                        let selects = [];
-                        if (targetLabel) {
-                            // If we find the label, target the select inside the same container
-                            const group = targetLabel.closest('.form-group') || targetLabel.parentElement;
-                            const s = group.querySelector('select');
-                            if (s) selects.push(s);
-                        } else {
-                            // Fallback: search all selects if label detection fails
-                            selects = Array.from(document.querySelectorAll('select'));
-                        }
-
-                        selects.forEach(select => {
-                            const options = Array.from(select.options);
-                            const randomOption = options.find(opt => 
-                                opt.text.toLowerCase().includes('random') || 
-                                opt.value.toLowerCase().includes('random')
-                            );
-
-                            if (randomOption && select.value !== randomOption.value) {
-                                // 1. Direct Selection
-                                select.value = randomOption.value;
-                                randomOption.selected = true;
-
-                                // 2. Trigger Framework state setters (React/Vue/etc.)
-                                const nativeValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
-                                if (nativeValueSetter) {
-                                    nativeValueSetter.call(select, randomOption.value);
-                                }
-
-                                // 3. Dispatch Browser Dispatch Events
-                                select.dispatchEvent(new Event('input', { bubbles: true }));
-                                select.dispatchEvent(new Event('change', { bubbles: true }));
-
-                                // 4. Trigger jQuery Events if present
-                                if (window.jQuery && window.jQuery.fn && window.jQuery.fn.trigger) {
-                                    window.jQuery(select).val(randomOption.value).trigger('change');
-                                } else if (window.$ && window.$.fn && window.$.fn.trigger) {
-                                    window.$(select).val(randomOption.value).trigger('change');
-                                }
-
-                                found = true;
-                                console.log('RandomTesting: Successfully set Testing Reason to:', randomOption.text);
-                            } else if (randomOption && select.value === randomOption.value) {
-                                // Already set, just wait to ensure it stays
-                                found = true; 
-                            }
-                        });
-
-                        // Keep checking for up to 20 seconds to handle state re-renders
-                        if (attempts < 40) {
-                            setTimeout(tryFill, 500);
-                        }
-                    };
+                    console.log('RandomTesting: Page-Context Injection Active.');
+                    let filled = false;
                     
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', tryFill);
-                    } else {
-                        tryFill();
-                    }
+                    const tryFill = () => {
+                        const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
+                        if (!select) return false;
+
+                        const options = Array.from(select.options);
+                        const randomOption = options.find(opt => 
+                            opt.text.toLowerCase().includes('random') || 
+                            opt.value.toLowerCase().includes('random')
+                        );
+
+                        if (randomOption && select.value !== randomOption.value) {
+                            select.value = randomOption.value;
+                            randomOption.selected = true;
+
+                            // Trigger framework state
+                            const nativeValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+                            if (nativeValueSetter) nativeValueSetter.call(select, randomOption.value);
+
+                            select.dispatchEvent(new Event('input', { bubbles: true }));
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+
+                            if (window.jQuery) {
+                                window.jQuery(select).val(randomOption.value).trigger('change');
+                            }
+                            
+                            console.log('RandomTesting: Auto-selected Random reason.');
+                            return true;
+                        }
+                        return select.value === randomOption?.value;
+                    };
+
+                    // Initial attempt
+                    filled = tryFill();
+
+                    // Mutation Observer to handle dynamic loading
+                    const observer = new MutationObserver(() => {
+                        if (!filled) filled = tryFill();
+                        if (filled) observer.disconnect();
+                    });
+
+                    observer.observe(document.body, { childList: true, subtree: true });
+
+                    // Final safety poll
+                    setTimeout(() => { if (!filled) tryFill(); }, 2000);
+                    setTimeout(() => { if (!filled) tryFill(); }, 5000);
                 })();
             `;
             document.documentElement.appendChild(script);
