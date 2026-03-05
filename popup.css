@@ -1055,6 +1055,13 @@ body {
         gap: 8px;
         padding: 12px;
     }
+
+    .export-buttons-inline {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        padding: 6px 10px;
+    }
 }
 
 .export-label {
