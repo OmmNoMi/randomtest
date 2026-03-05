@@ -141,13 +141,14 @@
 
                     // Extract Employee ID from the 'LABB PASSPORT' button link
                     let empId = '';
-                    const actionLinks = row.querySelectorAll('a');
-                    for (const link of actionLinks) {
-                        const href = link.getAttribute('href') || '';
-                        const onclick = link.getAttribute('onclick') || '';
+                    const actionElements = row.querySelectorAll('a, button');
+                    for (const el of actionElements) {
+                        const href = el.getAttribute('href') || '';
+                        const onclick = el.getAttribute('onclick') || '';
+                        const combined = href + ' ' + onclick;
 
-                        // Look for organizationEmployee parameter in href or onclick
-                        const idMatch = href.match(/organizationEmployee=([^&]+)/) || onclick.match(/organizationEmployee=([^&']+)/);
+                        // Look for organizationEmployee parameter
+                        const idMatch = combined.match(/organizationEmployee=([^&'\"\s)]+)/);
                         if (idMatch) {
                             empId = idMatch[1];
                             break;

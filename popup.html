@@ -417,16 +417,16 @@
                     <p class="config-hint">Percentage of the pool tested annually per DOT guidelines</p>
                     <div class="percent-slider-group">
                         <div class="percent-presets">
-                            <button class="preset-btn active" data-pct="25">25%</button>
+                            <button class="preset-btn" data-pct="25">25%</button>
                             <button class="preset-btn" data-pct="50">50%</button>
-                            <button class="preset-btn" data-pct="60">60%</button>
+                            <button class="preset-btn active" data-pct="60">60%</button>
                             <button class="preset-btn" data-pct="75">75%</button>
                             <button class="preset-btn" data-pct="100">100%</button>
                         </div>
                         <div class="custom-pct-row">
-                            <input type="range" id="annual-pct-slider" min="1" max="100" value="25" class="pct-slider">
+                            <input type="range" id="annual-pct-slider" min="1" max="100" value="60" class="pct-slider">
                             <div class="pct-input-box">
-                                <input type="number" id="annual-pct-input" min="1" max="100" value="25">
+                                <input type="number" id="annual-pct-input" min="1" max="100" value="60">
                                 <span class="pct-symbol">%</span>
                             </div>
                         </div>
@@ -446,7 +446,7 @@
                     </label>
                     <p class="config-hint">How often selection cycles occur throughout the year</p>
                     <div class="frequency-grid">
-                        <button class="freq-btn active" data-freq="annually" data-cycles="1">
+                        <button class="freq-btn" data-freq="annually" data-cycles="1">
                             <span class="freq-name">Annually</span>
                             <span class="freq-cycles">1 cycle / yr</span>
                         </button>
@@ -454,7 +454,7 @@
                             <span class="freq-name">Half-Yearly</span>
                             <span class="freq-cycles">2 cycles / yr</span>
                         </button>
-                        <button class="freq-btn" data-freq="quarterly" data-cycles="4">
+                        <button class="freq-btn active" data-freq="quarterly" data-cycles="4">
                             <span class="freq-name">Quarterly</span>
                             <span class="freq-cycles">4 cycles / yr</span>
                         </button>

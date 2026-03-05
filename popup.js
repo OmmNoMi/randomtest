@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let filtersLoaded = false;
 
     // Config state
-    let configPct = 25;
-    let configFrequency = { label: 'Annually', freq: 'annually', cycles: 1 };
+    let configPct = 60;
+    let configFrequency = { label: 'Quarterly', freq: 'quarterly', cycles: 4 };
     let isRandomView = false;
     let currentMetadata = null;
 
