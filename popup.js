@@ -197,6 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startDataExtraction() {
         console.log('RandomTesting: Starting data extraction...');
         setScanningUI(true);
+        if (statusText) statusText.innerText = 'Initializing extraction...';
+
+        // Artificial delay so the scanning UI is visible for at least 2 seconds
+        await new Promise(r => setTimeout(r, 2000));
+
         const tab = await getLabbTab();
         if (!tab) {
             console.error('RandomTesting: No Labb tab found');
@@ -245,19 +250,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Clear current results and begin a fresh scan?')) return;
 
         console.log('RandomTesting: Rescan initiated');
+
+        // Immediate UI feedback
+        setupView.classList.remove('hidden');
+        selectionView.classList.add('hidden');
+        winnerView.classList.add('hidden');
+        progressBar.style.width = '0%';
+        exitRandomView();
+
+        // Perform storage cleanup
         await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
         allEmployees = [];
         excludedIds = new Set();
         selectedWinners = [];
         randomizedList = [];
-
-        setupView.classList.remove('hidden');
-        selectionView.classList.add('hidden');
-        winnerView.classList.add('hidden');
-
-        progressBar.style.width = '0%';
-        setScanningUI(false);
-        exitRandomView();
 
         // Start fresh scan immediately
         startDataExtraction();
