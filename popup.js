@@ -810,33 +810,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         csvContent += rows;
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const filenameWithDate = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
 
+        // Create Base64 URI string for robust cross-environment downloading
+        // Avoid using Blob URLs in extension popups as Chrome often forces the UUID as the filename
+        const encodedUri = 'data:text/csv;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(csvContent)));
+
         try {
-            // Primary Method: Chrome Downloads API
             if (chrome?.downloads?.download) {
-                const url = URL.createObjectURL(blob);
                 chrome.downloads.download({
-                    url: url,
+                    url: encodedUri,
                     filename: filenameWithDate,
                     saveAs: false
-                }, () => {
-                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
                 });
-            } else {
-                throw new Error("chrome.downloads API unavailable");
+                return;
             }
         } catch (e) {
-            // Fallback Method: Data URI (Guarantees extension in strict environments)
-            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", filenameWithDate);
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => document.body.removeChild(link), 100);
+            console.warn("Chrome downloads API unavailable, using fallback", e);
         }
+
+        // Fallback: Use standard anchor click
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filenameWithDate);
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => document.body.removeChild(link), 100);
     }
 
     downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
