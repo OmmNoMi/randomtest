@@ -10,15 +10,11 @@
     --bg-toolbar: rgba(15, 23, 42, 0.2);
     --bg-footer: rgba(15, 23, 42, 0.3);
 
-    /* Modal Depth Layers (dark → light = deeper → elevated) */
+    /* Modal Depth Layers — fallback defaults (overridden by body.dark-mode / body.light-mode) */
     --bg-surface: #161b28;
-    /* deepest: header/footer strips, pool strip */
     --bg-elevated: #1e2332;
-    /* modal panel body */
     --bg-raised: #252d3f;
-    /* interactive cards, freq/preset buttons */
     --border-strong: rgba(51, 65, 85, 0.55);
-    /* stronger border than --border-color */
 
     --text-primary: #E2E8F0;
     --text-secondary: #94A3B8;
@@ -39,6 +35,18 @@
     --container-max-width: 420px;
 }
 
+/* Dark Mode — explicit body class (default) */
+body.dark-mode {
+    --bg-surface: #161b28;
+    /* deepest strips: header/footer/pool strip */
+    --bg-elevated: #1e2332;
+    /* modal panel body */
+    --bg-raised: #252d3f;
+    /* interactive cards: freq/preset buttons */
+    --border-strong: rgba(51, 65, 85, 0.55);
+}
+
+/* Light Mode — overrides when body has .light-mode */
 body.light-mode {
     --bg-main: #F1F5F9;
     --bg-card: #FFFFFF;
@@ -49,10 +57,9 @@ body.light-mode {
     --bg-toolbar: rgba(15, 23, 42, 0.02);
     --bg-footer: rgba(15, 23, 42, 0.04);
 
-    /* Modal Depth Layers - light mode */
     --bg-surface: #EEF2F7;
     --bg-elevated: #FFFFFF;
-    --bg-raised: #F4F7FC;
+    --bg-raised: #F1F5F9;
     --border-strong: rgba(0, 0, 0, 0.12);
 
     --text-primary: #0F172A;
@@ -67,6 +74,7 @@ body.light-mode {
 
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
 }
+
 
 /* Base Styles */
 * {
