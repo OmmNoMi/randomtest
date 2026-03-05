@@ -180,13 +180,24 @@
                         console.warn('RandomTesting: Could not find Employee ID for', cells[1]?.innerText, cells[2]?.innerText);
                     }
 
+                    const cell5Text = cells[5]?.innerText.trim() || '';
+                    let emailValue = '';
+                    let positionValue = 'General';
+
+                    if (cell5Text.includes('@')) {
+                        emailValue = cell5Text;
+                    } else if (cell5Text) {
+                        positionValue = cell5Text;
+                    }
+
                     const rowData = {
                         organization: cells[0]?.innerText.trim(),
                         firstName: cells[1]?.innerText.trim(),
                         lastName: cells[2]?.innerText.trim(),
                         dob: cells[3]?.innerText.trim(),
                         phone: cells[4]?.innerText.trim(),
-                        position: cells[5]?.innerText.trim() || 'General',
+                        email: emailValue,
+                        position: positionValue,
                         type: typeValue,
                         status: 'Active',
                         empId: empId // Store the ID for direct linking
