@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadWinnersCsvBtn = document.getElementById('download-winners-csv');
     const downloadRandomCsvBtn = document.getElementById('download-random-csv');
     const rescanBtn = document.getElementById('rescan-btn');
+    const rescanBtnFooter = document.getElementById('rescan-btn-footer');
     const themeToggle = document.getElementById('theme-toggle');
     const expandBtn = document.getElementById('expand-btn');
 
@@ -232,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    rescanBtn.addEventListener('click', async () => {
+    const handleRescan = async () => {
         if (confirm('Clear current results and begin a fresh scan?')) {
             await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
             allEmployees = [];
@@ -249,7 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             exitRandomView();
             buildBtn.click();
         }
-    });
+    };
+
+    rescanBtn.addEventListener('click', handleRescan);
+    if (rescanBtnFooter) rescanBtnFooter.addEventListener('click', handleRescan);
 
     // --- MESSAGE HANDLING ---
     chrome.runtime.onMessage.addListener((message) => {
@@ -688,6 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
         if (backToPoolBtn) backToPoolBtn.classList.remove('hidden');
+        if (rescanBtnFooter) rescanBtnFooter.classList.add('hidden');
     }
 
     function renderPassportCards(list) {
@@ -756,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Randomize
             `;
         }
+        if (rescanBtnFooter) rescanBtnFooter.classList.remove('hidden');
     }
 
     // Back to pool button
