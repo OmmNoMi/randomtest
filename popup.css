@@ -1847,22 +1847,29 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 }
 
 /* Random Results Header */
+/* ---- Random Results Header ---- */
 .random-results-header {
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-header);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    /* allow wrapping on narrow screens */
 }
 
 .random-results-title-group {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    /* take available space, push back btn to edge */
+    min-width: 0;
+    /* allow text truncation instead of overflow */
 }
 
 .random-results-badge {
@@ -1879,6 +1886,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .random-results-badge svg {
@@ -1886,16 +1894,61 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     height: 10px;
 }
 
+.random-results-meta {
+    min-width: 0;
+    /* allow child text to shrink */
+}
+
 .random-results-meta h2 {
     font-size: 0.88rem;
     font-weight: 800;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .random-results-meta .hint {
     font-size: 0.62rem;
     color: var(--text-muted);
     margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* On narrow screens: badge + back-btn wrap to their own row above the title */
+@media screen and (max-width: 480px) {
+    .random-results-header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    /* Top mini-row: badge on left, back button on right */
+    .random-results-title-group {
+        order: 2;
+        /* title goes second */
+        width: 100%;
+    }
+
+    .back-pool-btn {
+        order: 1;
+        /* back button goes first, full top row */
+        width: 100%;
+        justify-content: center;
+    }
+
+    .random-results-meta h2 {
+        font-size: 0.95rem;
+        white-space: normal;
+        /* allow wrap on mobile */
+    }
+
+    .random-results-meta .hint {
+        white-space: normal;
+    }
 }
 
 /* Back to Pool Button */
@@ -1913,6 +1966,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     gap: 5px;
     transition: all 0.2s;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .back-pool-btn svg {
@@ -1930,12 +1984,11 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 .random-config-strip {
     display: flex;
     align-items: center;
-    gap: 0;
-    padding: 8px 16px;
+    padding: 7px 14px;
     background: rgba(99, 102, 241, 0.04);
     border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 5px;
     flex-shrink: 0;
 }
 
@@ -1950,6 +2003,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     font-size: 0.62rem;
     font-weight: 700;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .config-chip .chip-label {
@@ -1960,6 +2014,8 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 .config-chip .chip-value {
     color: var(--primary);
 }
+
+
 
 /* Random Employee Cards Grid */
 .random-employee-list {
