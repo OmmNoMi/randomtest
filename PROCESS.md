@@ -58,6 +58,16 @@ This document serves as a comprehensive log of the development lifecycle, archit
     - Removing the guard condition so types are always auto-populated if the set is empty.
     - Swapping the call order in "Reset to Defaults" so `setupFilters()` runs before `saveFilters()`, ensuring the repopulated defaults are what gets written to storage.
 
+### Phase 6: Labb Passport Integration (The Auto-Fill Fix)
+- **Problem Identification**: Discovered that Labb's strict Content Security Policy (CSP) blocked the execution of traditional inline scripts or standard injected scripts for form manipulation. Standard `MutationObserver` in the isolated world could not reliably trigger framework events.
+- **Main World Bridge**: Implemented a specialized `passport-inject.js` script that executes in the `MAIN` world context (using `manifest.json`'s `world: "MAIN"` property).
+- **Framework Compatibility**: Developed the `tryFill` engine to bypass React/Vue state interference by:
+    - Accessing Native Setters: `Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set`.
+    - Manually dispatching `input` and `change` events.
+    - Leveraging native `jQuery` (if present) to trigger existing site handlers.
+- **Robust Polling & Observation**: Combined a `MutationObserver` with a failsafe 10-second polling interval to ensure the auto-fill "sticks" even if the page re-renders multiple times during initialization.
+- **URL Engine Updates**: Modified the extraction logic to append `autoreason=random` to generated Passport URLs, providing a seamless "click-to-automated-form" transition.
+
 ## 🏗️ Architectural Decisions
 
 ### 1. Data Storage Strategy
@@ -74,7 +84,12 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - **Footer Reordering**: On desktop (`min-width: 600px`), `order: 1` on `.export-widget` and `order: 2` on `.selection-action` swaps their visual position so Export is left and Randomize is right.
 - **Mobile-First Base**: All base CSS is mobile-optimized (stacked, full-width). Desktop overrides are applied exclusively within media queries.
 
-### 4. CSV Engine
+### 4. CSP-Safe Infrastructure (Main World Bridge)
+- **Challenge**: Modern sites with strict CSPs block `eval()` and inline scripts, making it hard for extensions to interact with site frameworks like React.
+- **Solution**: We offloaded form-automation logic to a dedicated "Main World" script (`passport-inject.js`). By bridging the isolated extension world and the page context, we can trigger internal event listeners that would otherwise be inaccessible.
+- **Safety**: The main world bridge is only activated on specific Passport creation URLs to minimize the exposure surface.
+
+### 5. CSV Engine
 - **Encoding**: Uses UTF-8 with a BOM (Byte Order Mark) for Microsoft Excel compatibility.
 - **Dynamic Headers**: Ensures all employee data fields (including Position and DOB) are included in every export.
 
@@ -87,4 +102,4 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - [ ] **Export Formats**: Add direct PDF export functionality for compliance record-keeping.
 
 ---
-*Last Updated: March 4, 2026*
+*Last Updated: March 5, 2026*

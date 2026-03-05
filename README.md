@@ -1,12 +1,13 @@
-# RandomTesting v2.0 (Premium Selection Engine)
+# RandomTesting v2.2 (Premium Selection Engine)
 
 A professional-grade Chrome extension designed for high-accuracy employee data extraction and randomized selection from the LabbReport platform.
 
-![Version 2.0](https://img.shields.io/badge/version-2.0-indigo.svg?style=for-the-badge)
+![Version 2.2](https://img.shields.io/badge/version-2.2-indigo.svg?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
 
 ## ✨ Features
 
+- **Passport Auto-Fill**: Automatically pre-selects "Random" as the Testing Reason when navigating to the Labb Passport page from the utility. Uses a CSP-compliant "Main World" injection for 100% reliability.
 - **Aesthetic Redesign**: Modern "Premium Dark" glassmorphism theme with a dedicated Light Mode toggle.
 - **Inclusion State Filters**: Isolate "Selected" vs "Unselected" pools with a single click to review your targets before randomization.
 - **Responsive Layout**: Intelligent toolbar stacking — mobile shows a full-width stacked layout; desktop uses a side-by-side toolbar with search, filters, and batch actions on one row.
