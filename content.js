@@ -268,7 +268,54 @@
     }
 
     const scanner = new LabbScanner();
-    scanner.init();
+    if (!window.location.pathname.includes('/labbPassport/create')) {
+        scanner.init();
+    }
+
+    // --- Passport Auto-Fill Engine --- 
+    function setupPassportAutoFill() {
+        if (!window.location.pathname.includes('/labbPassport/create')) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autoreason') === 'random') {
+            console.log('RandomTesting: Auto-fill triggered for Passport Reason');
+            let attempts = 0;
+
+            const tryFill = () => {
+                attempts++;
+                const selects = document.querySelectorAll('select');
+                let found = false;
+
+                selects.forEach(select => {
+                    const options = Array.from(select.options);
+                    const randomOption = options.find(opt =>
+                        opt.text.trim().toLowerCase() === 'random' ||
+                        opt.value.toLowerCase() === 'random'
+                    );
+
+                    if (randomOption) {
+                        select.value = randomOption.value;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        select.dispatchEvent(new Event('input', { bubbles: true }));
+                        found = true;
+                        console.log('RandomTesting: Successfully auto-selected Testing Reason.');
+                    }
+                });
+
+                if (!found && attempts < 10) {
+                    setTimeout(tryFill, 500);
+                }
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryFill);
+            } else {
+                tryFill();
+            }
+        }
+    }
+
+    setupPassportAutoFill();
 
     if (!window.rtListenerAdded) {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

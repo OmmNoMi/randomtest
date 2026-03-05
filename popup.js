@@ -802,7 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rows = data.map(e => {
             const orgId = currentMetadata?.orgId || '---';
-            const passportUrl = e.empId ? `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${e.empId}&organization_id=${orgId}` : '';
+            const passportUrl = e.empId ? `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${e.empId}&organization_id=${orgId}&autoreason=random` : '';
             return [
                 e.firstName, e.lastName, e.organization, e.type, e.dob, e.phone, e.email, e.status, e.position, passportUrl
             ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',');

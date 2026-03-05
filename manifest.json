@@ -15,7 +15,8 @@
     "content_scripts": [
         {
             "matches": [
-                "https://labbreport.com/screener/organizationEmployee*"
+                "https://labbreport.com/screener/organizationEmployee*",
+                "https://labbreport.com/screener/labbPassport/create*"
             ],
             "js": [
                 "content.js"
