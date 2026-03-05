@@ -793,7 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- CSV ENGINE ---
-    function downloadCSV(data, filename) {
+    async function downloadCSV(data, filename) {
         if (!data.length) return;
         const BOM = '\uFEFF';
         const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position', 'Passport Link'];
@@ -812,6 +812,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const filenameWithDate = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
         console.log(`RandomTesting: Preparing to download CSV as: ${filenameWithDate}`);
+
+        try {
+            // BEST METHOD: File System Access API
+            // Bypasses Chrome download manager UUID renaming bugs entirely by writing directly to disk
+            if (window.showSaveFilePicker) {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filenameWithDate,
+                    types: [{
+                        description: 'CSV Data File',
+                        accept: { 'text/csv': ['.csv'] }
+                    }]
+                });
+                const writable = await handle.createWritable();
+                // Send the raw text data into the file stream
+                await writable.write(csvContent);
+                await writable.close();
+                console.log('RandomTesting: Saved successfully via File System Stream.');
+                return;
+            }
+        } catch (err) {
+            // If the user simply clicked "Cancel" on the native Save dialogue, ignore.
+            if (err.name === 'AbortError') return;
+            console.warn("RandomTesting: FilePicker failed, trying fallback systems:", err);
+        }
 
         // Encode the string to Base64 to bypass Chrome's Blob UUID file naming issues
         const base64data = btoa(unescape(encodeURIComponent(csvContent)));
