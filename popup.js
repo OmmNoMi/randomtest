@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusClass = (emp.status || '').toLowerCase().includes('active') ? 'status-active' : 'status-terminated';
             const orgId = currentMetadata?.orgId || '---';
             const empId = emp.empId || '';
-            const passportUrl = `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${empId}&organization_id=${orgId}`;
+            const passportUrl = `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${empId}&organization_id=${orgId}&autoreason=random`;
 
             const card = document.createElement('div');
             card.className = 'passport-card';
