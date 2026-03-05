@@ -247,8 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
     buildBtn.addEventListener('click', startDataExtraction);
 
     const handleRescan = async () => {
-        if (!confirm('Clear current results and begin a fresh scan?')) return;
-
         console.log('RandomTesting: Rescan initiated');
 
         // Immediate UI feedback
