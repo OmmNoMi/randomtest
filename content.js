@@ -289,20 +289,26 @@
                 selects.forEach(select => {
                     const options = Array.from(select.options);
                     const randomOption = options.find(opt =>
-                        opt.text.trim().toLowerCase() === 'random' ||
-                        opt.value.toLowerCase() === 'random'
+                        opt.text.toLowerCase().includes('random') ||
+                        opt.value.toLowerCase().includes('random')
                     );
 
                     if (randomOption) {
-                        select.value = randomOption.value;
+                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+                        if (nativeInputValueSetter) {
+                            nativeInputValueSetter.call(select, randomOption.value);
+                        } else {
+                            select.value = randomOption.value;
+                        }
+
                         select.dispatchEvent(new Event('change', { bubbles: true }));
                         select.dispatchEvent(new Event('input', { bubbles: true }));
                         found = true;
-                        console.log('RandomTesting: Successfully auto-selected Testing Reason.');
+                        console.log('RandomTesting: Successfully auto-selected Testing Reason:', randomOption.text);
                     }
                 });
 
-                if (!found && attempts < 10) {
+                if (!found && attempts < 20) {
                     setTimeout(tryFill, 500);
                 }
             };
