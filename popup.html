@@ -231,7 +231,6 @@
 
                     <!-- RANDOM RESULTS PANEL (shown after config confirmed, hides toolbar + pool list) -->
                     <div id="random-results-panel" class="random-results-panel hidden">
-                        <!-- Header of random results -->
                         <div class="random-results-header">
                             <div class="random-results-title-group">
                                 <div class="random-results-badge">
@@ -249,13 +248,6 @@
                                     <p id="random-results-subtitle" class="hint">Lab Passport Generation List</p>
                                 </div>
                             </div>
-                            <button id="back-to-pool-btn" class="back-pool-btn" title="Back to Employee Pool">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="19" y1="12" x2="5" y2="12" />
-                                    <polyline points="12 19 5 12 12 5" />
-                                </svg>
-                                Back to Pool
-                            </button>
                         </div>
 
                         <!-- Config Summary Strip -->
@@ -271,8 +263,15 @@
 
                     <!-- WORKSPACE FOOTER -->
                     <div class="workspace-footer">
-                        <div class="selection-action w-full justify-center">
-                            <button id="select-random-btn" class="run-btn w-full justify-center">
+                        <div class="selection-action w-full gap-3">
+                            <button id="back-to-pool-btn" class="footer-btn secondary hidden">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="19" y1="12" x2="5" y2="12" />
+                                    <polyline points="12 19 5 12 12 5" />
+                                </svg>
+                                Back to Pool
+                            </button>
+                            <button id="select-random-btn" class="run-btn flex-1 justify-center">
                                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2">
                                     <polyline points="16 3 21 3 21 8" />

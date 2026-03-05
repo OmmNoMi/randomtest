@@ -680,6 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Re-Randomize
             `;
         }
+        if (backToPoolBtn) backToPoolBtn.classList.remove('hidden');
     }
 
     function renderPassportCards(list) {
@@ -738,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide random export button
         if (downloadRandomCsvBtn) downloadRandomCsvBtn.classList.add('hidden');
         if (randomExportSep) randomExportSep.classList.add('hidden');
+        if (backToPoolBtn) backToPoolBtn.classList.add('hidden');
 
         // Restore Randomize button label
         if (selectRandomBtn) {

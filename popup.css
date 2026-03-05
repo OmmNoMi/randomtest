@@ -1009,13 +1009,32 @@ body {
     width: 100%;
 }
 
-.justify-center {
-    justify-content: center;
+.flex-1 {
+    flex: 1;
+}
+
+.gap-3 {
+    gap: 12px;
 }
 
 .selection-action {
     display: flex;
-    gap: 8px;
+    gap: 12px;
+}
+
+/* Mobile stacking for action buttons */
+@media screen and (max-width: 480px) {
+    .selection-action {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .selection-action button {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
 }
 
 .export-widget {
@@ -1079,11 +1098,6 @@ body {
     color: var(--accent-emerald);
 }
 
-.selection-action {
-    display: flex;
-    gap: 8px;
-}
-
 .count-input-wrapper input {
     width: 60px;
     padding: 10px;
@@ -1112,6 +1126,38 @@ body {
     gap: 10px;
     box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
     transition: all 0.2s;
+}
+
+.footer-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.footer-btn.secondary {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.footer-btn.secondary:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.footer-btn svg {
+    width: 16px;
+    height: 16px;
 }
 
 .run-btn:hover:not(:disabled) {
@@ -1849,27 +1895,21 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 /* Random Results Header */
 /* ---- Random Results Header ---- */
 .random-results-header {
-    padding: 10px 14px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-header);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     flex-shrink: 0;
-    flex-wrap: wrap;
-    /* allow wrapping on narrow screens */
 }
 
 .random-results-title-group {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 1;
-    /* take available space, push back btn to edge */
+    gap: 12px;
     min-width: 0;
-    /* allow text truncation instead of overflow */
 }
 
 .random-results-badge {
@@ -1886,7 +1926,6 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     flex-shrink: 0;
-    white-space: nowrap;
 }
 
 .random-results-badge svg {
@@ -1896,7 +1935,6 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 
 .random-results-meta {
     min-width: 0;
-    /* allow child text to shrink */
 }
 
 .random-results-meta h2 {
@@ -1912,73 +1950,9 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     font-size: 0.62rem;
     color: var(--text-muted);
     margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* On narrow screens: badge + back-btn wrap to their own row above the title */
-@media screen and (max-width: 480px) {
-    .random-results-header {
-        padding: 10px 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-
-    /* Top mini-row: badge on left, back button on right */
-    .random-results-title-group {
-        order: 2;
-        /* title goes second */
-        width: 100%;
-    }
-
-    .back-pool-btn {
-        order: 1;
-        /* back button goes first, full top row */
-        width: 100%;
-        justify-content: center;
-    }
-
-    .random-results-meta h2 {
-        font-size: 0.95rem;
-        white-space: normal;
-        /* allow wrap on mobile */
-    }
-
-    .random-results-meta .hint {
-        white-space: normal;
-    }
-}
-
-/* Back to Pool Button */
-.back-pool-btn {
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s;
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.back-pool-btn svg {
-    width: 13px;
-    height: 13px;
-}
-
-.back-pool-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: var(--primary-glow);
-}
 
 /* Config Summary Strip */
 .random-config-strip {
