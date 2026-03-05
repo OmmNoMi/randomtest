@@ -272,31 +272,53 @@
         scanner.init();
     }
 
+    // --- High-Visibility Diagnostic Banner ---
+    function showDiagnosticBanner(text, color = '#5D3FD3') {
+        let banner = document.getElementById('rt-diagnostic-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'rt-diagnostic-banner';
+            banner.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; height: 32px; 
+                background: ${color}; color: white; display: flex; align-items: center; 
+                justify-content: center; z-index: 999999; font-weight: bold; 
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3); pointer-events: none;
+                font-family: -apple-system, sans-serif;
+            `;
+            document.documentElement.appendChild(banner);
+        }
+        banner.innerText = text;
+        banner.style.background = color;
+    }
+
     // --- Passport Auto-Fill Engine --- 
     function setupPassportAutoFill() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('autoreason') !== 'random') return;
+        if (urlParams.get('autoreason') !== 'random') {
+            showDiagnosticBanner('RT: URL Matched, No Auto-reason', '#333');
+            return;
+        }
 
-        console.log('RandomTesting: Auto-fill engine ACTIVE. Searching for form...');
+        showDiagnosticBanner('RT: AUTO-FILLING RANDOM...', '#FF007F');
 
         // 1. Content Script Layer (DOM-only but highly reliable)
         const runNativeFill = () => {
             const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
-            if (!select) return false;
+            if (select) {
+                const randomOption = Array.from(select.options).find(opt =>
+                    opt.text.toLowerCase().includes('random') ||
+                    opt.value.toLowerCase().includes('random')
+                );
 
-            const randomOption = Array.from(select.options).find(opt =>
-                opt.text.toLowerCase().includes('random') ||
-                opt.value.toLowerCase().includes('random')
-            );
-
-            if (randomOption && select.value !== randomOption.value) {
-                select.value = randomOption.value;
-                select.dispatchEvent(new Event('input', { bubbles: true }));
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('RandomTesting: Level 1 (Native) fill successful.');
-                return true;
+                if (randomOption && select.value !== randomOption.value) {
+                    select.value = randomOption.value;
+                    select.dispatchEvent(new Event('input', { bubbles: true }));
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    showDiagnosticBanner('RT: SUCCESS - RANDOM SELECTED!', '#00C853');
+                    return true;
+                }
             }
-            return select.value === randomOption?.value;
+            return false;
         };
 
         // 2. Page Injection Layer (Bypasses Framework constraints)
@@ -304,19 +326,15 @@
             const script = document.createElement('script');
             script.textContent = `
                 (function() {
-                    console.log('RandomTesting: Level 2 (Page-Context) injected.');
-                    let attempts = 0;
                     const tryFill = () => {
-                        attempts++;
                         const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
-                        if (!select) return false;
+                        if (!select) return;
 
                         const randomOption = Array.from(select.options).find(opt => 
                             opt.text.toLowerCase().includes('random')
                         );
 
                         if (randomOption && select.value !== randomOption.value) {
-                            // Native setter trick for React/Vue
                             const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
                             if (setter) setter.call(select, randomOption.value);
                             else select.value = randomOption.value;
@@ -324,39 +342,25 @@
                             select.dispatchEvent(new Event('input', { bubbles: true }));
                             select.dispatchEvent(new Event('change', { bubbles: true }));
 
-                            // jQuery support
                             if (window.jQuery) window.jQuery(select).val(randomOption.value).trigger('change');
-                            if (window.$) window.$(select).val(randomOption.value).trigger('change');
-
-                            console.log('RandomTesting: Level 2 (Page-Context) fill successful.');
+                            console.log('RandomTesting: Page-Context Fill Success');
                         }
-                        return true;
                     };
-
-                    const observer = new MutationObserver(() => tryFill());
+                    const observer = new MutationObserver(tryFill);
                     observer.observe(document.body, { childList: true, subtree: true });
                     tryFill();
-                    
-                    // Backup polling for 10 seconds
-                    const int = setInterval(tryFill, 1000);
-                    setTimeout(() => clearInterval(int), 10000);
+                    setInterval(tryFill, 1000);
                 })();
             `;
             (document.head || document.documentElement).appendChild(script);
-            script.remove();
         }
 
-        // Start both layers
         runNativeFill();
         injectPageScript();
 
-        // Content script monitoring
         const observer = new MutationObserver(() => runNativeFill());
         observer.observe(document.body, { childList: true, subtree: true });
-
-        // Interval fallback for the content script too
-        const nativeInterval = setInterval(runNativeFill, 1000);
-        setTimeout(() => clearInterval(nativeInterval), 15000);
+        setInterval(runNativeFill, 1000);
     }
 
     // Surgical filtering for the scanner initialization
