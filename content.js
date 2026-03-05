@@ -278,10 +278,10 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('autoreason') === 'random') {
-            console.log('RandomTesting: Auto-fill triggered for Passport Reason');
+            console.log('RandomTesting: Auto-fill engine primed for Passport.');
 
             // Injecting directly into the Main Page Context to bypass Extension Isolation.
-            // This is required to communicate with the page's native jQuery/React instances directly.
+            // This allows us to talk to the page's native frameworks directly.
             const script = document.createElement('script');
             script.textContent = `
                 (function() {
@@ -289,42 +289,61 @@
                     const tryFill = () => {
                         attempts++;
                         let found = false;
-                        document.querySelectorAll('select').forEach(select => {
+
+                        // Identify the target dropdown by its associated label
+                        const labels = Array.from(document.querySelectorAll('label'));
+                        const targetLabel = labels.find(l => l.innerText.toLowerCase().includes('testing reason'));
+                        
+                        let selects = [];
+                        if (targetLabel) {
+                            // If we find the label, target the select inside the same container
+                            const group = targetLabel.closest('.form-group') || targetLabel.parentElement;
+                            const s = group.querySelector('select');
+                            if (s) selects.push(s);
+                        } else {
+                            // Fallback: search all selects if label detection fails
+                            selects = Array.from(document.querySelectorAll('select'));
+                        }
+
+                        selects.forEach(select => {
                             const options = Array.from(select.options);
                             const randomOption = options.find(opt => 
                                 opt.text.toLowerCase().includes('random') || 
                                 opt.value.toLowerCase().includes('random')
                             );
 
-                            if (randomOption) {
-                                // 1. Set the raw values natively
+                            if (randomOption && select.value !== randomOption.value) {
+                                // 1. Direct Selection
                                 select.value = randomOption.value;
                                 randomOption.selected = true;
 
-                                // 2. Trigger React native setters if applicable
-                                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
-                                if (nativeInputValueSetter) {
-                                    nativeInputValueSetter.call(select, randomOption.value);
+                                // 2. Trigger Framework state setters (React/Vue/etc.)
+                                const nativeValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+                                if (nativeValueSetter) {
+                                    nativeValueSetter.call(select, randomOption.value);
                                 }
 
-                                // 3. Dispatch native browser events
+                                // 3. Dispatch Browser Dispatch Events
                                 select.dispatchEvent(new Event('input', { bubbles: true }));
                                 select.dispatchEvent(new Event('change', { bubbles: true }));
 
-                                // 4. Trigger jQuery events safely if it's a jQuery-based site
-                                if (typeof window.$ !== 'undefined') {
-                                    window.$(select).val(randomOption.value).trigger('change');
-                                } else if (typeof window.jQuery !== 'undefined') {
+                                // 4. Trigger jQuery Events if present
+                                if (window.jQuery && window.jQuery.fn && window.jQuery.fn.trigger) {
                                     window.jQuery(select).val(randomOption.value).trigger('change');
+                                } else if (window.$ && window.$.fn && window.$.fn.trigger) {
+                                    window.$(select).val(randomOption.value).trigger('change');
                                 }
 
                                 found = true;
-                                console.log('RandomTesting PageSync: Successfully auto-selected Testing Reason:', randomOption.text);
+                                console.log('RandomTesting: Successfully set Testing Reason to:', randomOption.text);
+                            } else if (randomOption && select.value === randomOption.value) {
+                                // Already set, just wait to ensure it stays
+                                found = true; 
                             }
                         });
 
-                        // Keep polling for up to 15 seconds (30 attempts * 500ms) to handle slow API loads
-                        if (!found && attempts < 30) {
+                        // Keep checking for up to 20 seconds to handle state re-renders
+                        if (attempts < 40) {
                             setTimeout(tryFill, 500);
                         }
                     };
@@ -332,8 +351,7 @@
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', tryFill);
                     } else {
-                        tryFill(); // Wait 1 second initially to let frameworks spin up
-                        setTimeout(tryFill, 1000);
+                        tryFill();
                     }
                 })();
             `;

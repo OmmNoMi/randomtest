@@ -23,7 +23,8 @@
             ],
             "css": [
                 "inject.css"
-            ]
+            ],
+            "all_frames": true
         }
     ],
     "host_permissions": [
