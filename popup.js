@@ -522,13 +522,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(poolSize) {
         randomizeModal.classList.remove('hidden');
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.touchAction = 'none';
         document.body.style.overflow = 'hidden';
+        document.body.style.touchAction = 'none';
         updateModalCalculations(poolSize);
     }
 
     function closeModal() {
         randomizeModal.classList.add('hidden');
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.touchAction = '';
         document.body.style.overflow = '';
+        document.body.style.touchAction = '';
     }
 
     modalCloseBtn.addEventListener('click', closeModal);
