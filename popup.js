@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (randomResultsPanel) randomResultsPanel.classList.remove('hidden');
 
         // Update header text
-        if (randomResultsTitle) randomResultsTitle.innerText = `${cycleCount} Randomly Selected Employee${cycleCount !== 1 ? 's' : ''}`;
+        if (randomResultsTitle) randomResultsTitle.innerText = `Randomly Selected Employees`;
         if (randomResultsSubtitle) randomResultsSubtitle.innerText = `${configFrequency.label} • ${configPct}% Annual Rate • Lab Passport Generation`;
 
         // Update selection summary badge
