@@ -277,64 +277,12 @@
 
     const scanner = new LabbScanner();
     const isScanPage = window.location.href.includes('/organizationEmployee');
-    const isPassportPage = window.location.href.includes('/labbPassport/create');
 
     if (isScanPage) {
         scanner.init();
     }
 
-    // --- Passport Auto-Fill Engine --- 
-    function setupPassportAutoFill() {
-        if (!isPassportPage) return;
-
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('autoreason') !== 'random') return;
-
-        const runNativeFill = () => {
-            const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
-            if (select) {
-                const randomOption = Array.from(select.options || []).find(opt =>
-                    (opt.text || '').toLowerCase().includes('random') ||
-                    (opt.value || '').toLowerCase().includes('random')
-                );
-
-                if (randomOption && select.value !== randomOption.value) {
-                    select.value = randomOption.value;
-                    select.dispatchEvent(new Event('input', { bubbles: true }));
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        const startObserver = () => {
-            // Safety Check: Avoid running on elements before the body is ready
-            if (!document || !document.body) {
-                setTimeout(startObserver, 200);
-                return;
-            }
-
-            // Initial attempt
-            runNativeFill();
-
-            // Observe for dynamic updates (site is React/Vue based)
-            const observer = new MutationObserver(runNativeFill);
-            observer.observe(document.body, { childList: true, subtree: true });
-
-            // Backup polling for 10 seconds to ensure it sticks
-            const pollInt = setInterval(runNativeFill, 1000);
-            setTimeout(() => clearInterval(pollInt), 10000);
-        };
-
-        startObserver();
-    }
-
-    if (isPassportPage) {
-        setupPassportAutoFill();
-    }
-
-    // Communication Layer
+    // Communication Layer - Handles scanning commands from popup
     if (!window.rtListenerAdded) {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'PING') {
