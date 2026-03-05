@@ -139,20 +139,41 @@
                         else if (lt.includes('pre-hire') || lt.includes('prehire')) typeValue = 'Pre-hire';
                     }
 
-                    // Extract Employee ID from the 'LABB PASSPORT' button link
+                    // Extract Employee ID - scan all interactive elements in the row
                     let empId = '';
-                    const actionElements = row.querySelectorAll('a, button');
-                    for (const el of actionElements) {
-                        const href = el.getAttribute('href') || '';
-                        const onclick = el.getAttribute('onclick') || '';
-                        const combined = href + ' ' + onclick;
 
-                        // Look for organizationEmployee parameter
-                        const idMatch = combined.match(/organizationEmployee=([^&'\"\s)]+)/);
-                        if (idMatch) {
-                            empId = idMatch[1];
-                            break;
+                    // First check the row itself for data attributes
+                    empId = row.getAttribute('data-id') || row.getAttribute('data-name') || '';
+
+                    if (!empId) {
+                        const interactiveEls = row.querySelectorAll('a, button');
+                        for (const el of interactiveEls) {
+                            // Check link data attributes first
+                            empId = el.getAttribute('data-id') || el.getAttribute('data-name') || '';
+                            if (empId) break;
+
+                            const url = (el.getAttribute('href') || '') + ' ' + (el.getAttribute('onclick') || '');
+
+                            // Pattern 1: Query parameter (e.g., ?organizationEmployee=ID)
+                            const queryMatch = url.match(/organizationEmployee=([^&'\"\s)]+)/);
+                            if (queryMatch) {
+                                empId = queryMatch[1];
+                                break;
+                            }
+
+                            // Pattern 2: Path segment (e.g., /organizationEmployee/ID/edit)
+                            const pathMatch = url.match(/\/organizationEmployee\/([^\/\?\&'\"\s]+)/);
+                            if (pathMatch) {
+                                empId = pathMatch[1];
+                                break;
+                            }
                         }
+                    }
+
+                    if (empId) {
+                        console.log(`RandomTesting: Found ID ${empId} for ${cells[1]?.innerText} ${cells[2]?.innerText}`);
+                    } else {
+                        console.warn('RandomTesting: Could not find Employee ID for', cells[1]?.innerText, cells[2]?.innerText);
                     }
 
                     const rowData = {
