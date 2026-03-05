@@ -1749,6 +1749,8 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     padding: 12px 14px 16px;
     border-top: 1px solid var(--border-color);
     align-items: center;
+    justify-content: flex-end;
+    /* anchor buttons to the right */
 }
 
 @media screen and (min-width: 450px) {
@@ -1777,11 +1779,12 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 }
 
 .modal-confirm-btn {
-    flex: 1;
+    flex: 0 0 auto;
+    /* auto-size, don't stretch */
     background: var(--primary);
     border: none;
     border-radius: 10px;
-    padding: 10px 16px;
+    padding: 10px 22px;
     font-size: 0.8rem;
     font-weight: 800;
     color: white;
@@ -1795,7 +1798,6 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     white-space: nowrap;
-    /* prevent text wrapping on small screens */
 }
 
 .modal-confirm-btn svg {
