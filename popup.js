@@ -194,25 +194,31 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { console.error('Injection failed:', e); }
     }
 
-    buildBtn.addEventListener('click', async () => {
+    async function startDataExtraction() {
+        console.log('RandomTesting: Starting data extraction...');
         setScanningUI(true);
         const tab = await getLabbTab();
         if (!tab) {
+            console.error('RandomTesting: No Labb tab found');
             if (statusText) statusText.innerText = 'Error: LabbReport page not found.';
             setScanningUI(false);
             return;
         }
 
+        console.log('RandomTesting: Sending PING to tab', tab.id);
         chrome.tabs.sendMessage(tab.id, { action: 'PING' }, (response) => {
             if (chrome.runtime.lastError || !response) {
+                console.log('RandomTesting: PING failed, injecting script...');
                 chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] }, () => {
+                    console.log('RandomTesting: Script injected, sending START_EXTRACTION');
                     chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
                 });
             } else {
+                console.log('RandomTesting: PING success, sending START_EXTRACTION');
                 chrome.tabs.sendMessage(tab.id, { action: 'START_EXTRACTION', itemsPerPage: 50 });
             }
         });
-    });
+    }
 
     function setScanningUI(isScanning) {
         if (isScanning) {
@@ -233,23 +239,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    buildBtn.addEventListener('click', startDataExtraction);
+
     const handleRescan = async () => {
-        if (confirm('Clear current results and begin a fresh scan?')) {
-            await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
-            allEmployees = [];
-            excludedIds = new Set();
-            selectedWinners = [];
-            randomizedList = [];
+        if (!confirm('Clear current results and begin a fresh scan?')) return;
 
-            setupView.classList.remove('hidden');
-            selectionView.classList.add('hidden');
-            winnerView.classList.add('hidden');
+        console.log('RandomTesting: Rescan initiated');
+        await chrome.storage.local.remove(['allEmployees', 'removedIds', 'rt_scan_state']);
+        allEmployees = [];
+        excludedIds = new Set();
+        selectedWinners = [];
+        randomizedList = [];
 
-            progressBar.style.width = '0%';
-            setScanningUI(false);
-            exitRandomView();
-            buildBtn.click();
-        }
+        setupView.classList.remove('hidden');
+        selectionView.classList.add('hidden');
+        winnerView.classList.add('hidden');
+
+        progressBar.style.width = '0%';
+        setScanningUI(false);
+        exitRandomView();
+
+        // Start fresh scan immediately
+        startDataExtraction();
     };
 
     rescanBtn.addEventListener('click', handleRescan);

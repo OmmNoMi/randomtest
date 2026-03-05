@@ -1,6 +1,4 @@
 (function () {
-    if (window.rtScannerInjected) return;
-    window.rtScannerInjected = true;
     console.log('RandomTesting: Engine Initialized.');
 
     class LabbScanner {
@@ -25,7 +23,11 @@
         }
 
         async start(itemsPerPage = 50) {
-            if (this.isScanning) return;
+            console.log('RandomTesting: Scanner.start() called with itemsPerPage:', itemsPerPage);
+            if (this.isScanning) {
+                console.warn('RandomTesting: Scanner already running, skipping start');
+                return;
+            }
             this.isScanning = true;
             this.data = [];
 
@@ -48,6 +50,7 @@
         }
 
         async processCurrentPage() {
+            console.log('RandomTesting: Processing current page...');
             try {
                 // Step 1: Scan current page
                 const pageResults = this.parseTable();
@@ -121,6 +124,7 @@
 
         parseTable() {
             const rows = document.querySelectorAll('table tbody tr');
+            console.log(`RandomTesting: parseTable starting for ${rows.length} rows`);
             const results = [];
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
@@ -152,7 +156,7 @@
                             empId = el.getAttribute('data-id') || el.getAttribute('data-name') || '';
                             if (empId) break;
 
-                            const url = (el.getAttribute('href') || '') + ' ' + (el.getAttribute('onclick') || '');
+                            const url = (el.href || '') + ' ' + (el.getAttribute('href') || '') + ' ' + (el.getAttribute('onclick') || '');
 
                             // Pattern 1: Query parameter (e.g., ?organizationEmployee=ID)
                             const queryMatch = url.match(/organizationEmployee=([^&'\"\s)]+)/);
@@ -255,15 +259,18 @@
     const scanner = new LabbScanner();
     scanner.init();
 
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        if (request.action === 'PING') {
-            sendResponse({ status: 'PONG' });
-        } else if (request.action === 'START_EXTRACTION') {
-            scanner.start(request.itemsPerPage || 50);
-            sendResponse({ status: 'ACK' });
-        } else if (request.action === 'GET_METADATA') {
-            sendResponse({ metadata: scanner.extractMetadata() });
-        }
-        return true;
-    });
+    if (!window.rtListenerAdded) {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.action === 'PING') {
+                sendResponse({ status: 'PONG' });
+            } else if (request.action === 'START_EXTRACTION') {
+                scanner.start(request.itemsPerPage || 50);
+                sendResponse({ status: 'ACK' });
+            } else if (request.action === 'GET_METADATA') {
+                sendResponse({ metadata: scanner.extractMetadata() });
+            }
+            return true;
+        });
+        window.rtListenerAdded = true;
+    }
 })();
