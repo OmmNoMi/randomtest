@@ -276,78 +276,65 @@
     }
 
     const scanner = new LabbScanner();
-    if (!window.location.pathname.includes('/labbPassport/create')) {
-        scanner.init();
-    }
+    const isScanPage = window.location.href.includes('/organizationEmployee');
+    const isPassportPage = window.location.href.includes('/labbPassport/create');
 
-    // --- High-Visibility Diagnostic Banner ---
-    function showDiagnosticBanner(text, color = '#5D3FD3') {
-        let banner = document.getElementById('rt-diagnostic-banner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'rt-diagnostic-banner';
-            banner.style.cssText = `
-                position: fixed; top: 0; left: 0; right: 0; height: 32px; 
-                background: ${color}; color: white; display: flex; align-items: center; 
-                justify-content: center; z-index: 999999; font-weight: bold; 
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3); pointer-events: none;
-                font-family: -apple-system, sans-serif;
-            `;
-            document.documentElement.appendChild(banner);
-        }
-        banner.innerText = text;
-        banner.style.background = color;
+    if (isScanPage) {
+        scanner.init();
     }
 
     // --- Passport Auto-Fill Engine --- 
     function setupPassportAutoFill() {
+        if (!isPassportPage) return;
+
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('autoreason') !== 'random') {
-            showDiagnosticBanner('RT: URL Matched, No Auto-reason', '#333');
-            return;
-        }
+        if (urlParams.get('autoreason') !== 'random') return;
 
-        showDiagnosticBanner('RT: AUTO-FILLING RANDOM...', '#FF007F');
-
-        // 1. Content Script Layer (DOM-only but highly reliable)
         const runNativeFill = () => {
             const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
             if (select) {
-                const randomOption = Array.from(select.options).find(opt =>
-                    opt.text.toLowerCase().includes('random') ||
-                    opt.value.toLowerCase().includes('random')
+                const randomOption = Array.from(select.options || []).find(opt =>
+                    (opt.text || '').toLowerCase().includes('random') ||
+                    (opt.value || '').toLowerCase().includes('random')
                 );
 
                 if (randomOption && select.value !== randomOption.value) {
                     select.value = randomOption.value;
                     select.dispatchEvent(new Event('input', { bubbles: true }));
                     select.dispatchEvent(new Event('change', { bubbles: true }));
-                    showDiagnosticBanner('RT: SUCCESS - RANDOM SELECTED!', '#00C853');
                     return true;
                 }
             }
             return false;
         };
 
-        runNativeFill();
+        const startObserver = () => {
+            // Safety Check: Avoid running on elements before the body is ready
+            if (!document || !document.body) {
+                setTimeout(startObserver, 200);
+                return;
+            }
 
-        const observer = new MutationObserver(() => runNativeFill());
-        observer.observe(document.body, { childList: true, subtree: true });
-        setInterval(runNativeFill, 1000);
+            // Initial attempt
+            runNativeFill();
+
+            // Observe for dynamic updates (site is React/Vue based)
+            const observer = new MutationObserver(runNativeFill);
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // Backup polling for 10 seconds to ensure it sticks
+            const pollInt = setInterval(runNativeFill, 1000);
+            setTimeout(() => clearInterval(pollInt), 10000);
+        };
+
+        startObserver();
     }
 
-    // Surgical filtering for the scanner initialization
-    const isScanPage = window.location.href.includes('/organizationEmployee');
-    const isPassportPage = window.location.href.includes('/labbPassport/create');
-
-    if (isScanPage) {
-        console.log('%c RANDOM TESTING: EMP-LIST SCANNER ACTIVE ', 'background: #5D3FD3; color: white; border-radius: 4px; padding: 2px 5px; font-weight: bold;');
-        scanner.init();
-    } else if (isPassportPage) {
-        console.log('%c RANDOM TESTING: PASSPORT AUTO-FILL ACTIVE ', 'background: #FF007F; color: white; border-radius: 4px; padding: 2px 5px; font-weight: bold;');
+    if (isPassportPage) {
         setupPassportAutoFill();
     }
 
+    // Communication Layer
     if (!window.rtListenerAdded) {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'PING') {
