@@ -797,21 +797,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!data.length) return;
         const BOM = '\uFEFF';
         const headers = ['First Name', 'Last Name', 'Organization', 'Type', 'DOB', 'Phone', 'Email', 'Status', 'Position', 'Passport Link'];
+
+        let csvContent = BOM + headers.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',') + '\n';
+
         const rows = data.map(e => {
             const orgId = currentMetadata?.orgId || '---';
             const passportUrl = e.empId ? `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${e.empId}&organization_id=${orgId}` : '';
             return [
                 e.firstName, e.lastName, e.organization, e.type, e.dob, e.phone, e.email, e.status, e.position, passportUrl
             ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',');
-        });
+        }).join('\n');
 
-        const csvContent = BOM + headers.join(',') + '\n' + rows.join('\n');
+        csvContent += rows;
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+
+        document.body.appendChild(a);
         a.click();
+
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
     }
 
     downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
