@@ -1,5 +1,13 @@
 (function () {
-    console.log('RandomTesting: Engine Initialized.');
+    // DIAGNOSTIC ALERT
+    if (window.rtEngineLoaded) return;
+    window.rtEngineLoaded = true;
+
+    console.log('%c RandomTesting: Engine Initialized (v0.2) ', 'background: #333; color: orange; font-weight: bold;');
+
+    if (window.location.search.includes('autoreason=random')) {
+        console.log('RandomTesting: PASSPORT PAGE DETECTED.');
+    }
 
     class LabbScanner {
         constructor() {
@@ -321,42 +329,7 @@
             return false;
         };
 
-        // 2. Page Injection Layer (Bypasses Framework constraints)
-        function injectPageScript() {
-            const script = document.createElement('script');
-            script.textContent = `
-                (function() {
-                    const tryFill = () => {
-                        const select = document.getElementById('testing_reason') || document.querySelector('select[name="testing_reason"]');
-                        if (!select) return;
-
-                        const randomOption = Array.from(select.options).find(opt => 
-                            opt.text.toLowerCase().includes('random')
-                        );
-
-                        if (randomOption && select.value !== randomOption.value) {
-                            const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
-                            if (setter) setter.call(select, randomOption.value);
-                            else select.value = randomOption.value;
-
-                            select.dispatchEvent(new Event('input', { bubbles: true }));
-                            select.dispatchEvent(new Event('change', { bubbles: true }));
-
-                            if (window.jQuery) window.jQuery(select).val(randomOption.value).trigger('change');
-                            console.log('RandomTesting: Page-Context Fill Success');
-                        }
-                    };
-                    const observer = new MutationObserver(tryFill);
-                    observer.observe(document.body, { childList: true, subtree: true });
-                    tryFill();
-                    setInterval(tryFill, 1000);
-                })();
-            `;
-            (document.head || document.documentElement).appendChild(script);
-        }
-
         runNativeFill();
-        injectPageScript();
 
         const observer = new MutationObserver(() => runNativeFill());
         observer.observe(document.body, { childList: true, subtree: true });

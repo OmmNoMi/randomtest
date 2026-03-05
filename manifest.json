@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "OmmNoMi Random Selection Utility",
-    "version": "0.1",
+    "version": "0.3",
     "description": "Premium tool to automate employee lists and select entries for random testing.",
     "permissions": [
         "activeTab",
@@ -15,8 +15,8 @@
     "content_scripts": [
         {
             "matches": [
-                "*://labbreport.com/*",
-                "*://*.labbreport.com/*"
+                "*://*.labbreport.com/*",
+                "*://labbreport.com/*"
             ],
             "js": [
                 "content.js"
@@ -24,6 +24,17 @@
             "css": [
                 "inject.css"
             ],
+            "all_frames": true,
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "*://*.labbreport.com/screener/labbPassport/create*"
+            ],
+            "js": [
+                "passport-inject.js"
+            ],
+            "world": "MAIN",
             "all_frames": true,
             "run_at": "document_end"
         }
