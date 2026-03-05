@@ -2088,6 +2088,14 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     border: 1px solid;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    text-decoration: none;
+}
+
+@media screen and (max-width: 480px) {
+    .passport-btn {
+        padding: 10px 14px;
+        font-size: 0.72rem;
+    }
 }
 
 .passport-btn svg {

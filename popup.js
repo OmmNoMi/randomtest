@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let configPct = 25;
     let configFrequency = { label: 'Annually', freq: 'annually', cycles: 1 };
     let isRandomView = false;
+    let currentMetadata = null;
 
     // --- INITIALIZATION ---
     async function init() {
@@ -695,6 +696,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         list.forEach((emp, index) => {
             const statusClass = (emp.status || '').toLowerCase().includes('active') ? 'status-active' : 'status-terminated';
+            const orgId = currentMetadata?.orgId || '---';
+            const empId = emp.empId || '';
+            const passportUrl = `https://labbreport.com/screener/labbPassport/create?organizationEmployee=${empId}&organization_id=${orgId}`;
 
             const card = document.createElement('div');
             card.className = 'passport-card';
@@ -710,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 ${emp.email ? `<div class="tag" style="font-size:0.58rem; color:var(--text-muted); margin-top:-2px;">${emp.email}</div>` : ''}
                 <div class="passport-card-actions">
-                    <button class="passport-btn btn-passport" title="Create Lab Passport for ${emp.firstName} ${emp.lastName}">
+                    <a href="${passportUrl}" target="_blank" class="passport-btn btn-passport" title="Create Lab Passport for ${emp.firstName} ${emp.lastName}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
@@ -718,15 +722,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <line x1="9" y1="15" x2="15" y2="15"/>
                         </svg>
                         Create Lab Passport
-                    </button>
+                    </a>
                 </div>
             `;
-
-            // Passport button click (placeholder)
-            card.querySelector('.btn-passport').addEventListener('click', () => {
-                // Functionality to be implemented later
-                console.log('Create Lab Passport for:', emp.firstName, emp.lastName, emp);
-            });
 
             randomEmployeeList.appendChild(card);
         });
@@ -809,6 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UTILS ---
     function showInfoBanner(meta) {
         if (!meta) return;
+        currentMetadata = meta;
         const orgNameEl = document.getElementById('display-org-name');
         const orgIdEl = document.getElementById('display-org-id');
         const userEl = document.getElementById('display-user');

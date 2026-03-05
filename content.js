@@ -139,6 +139,21 @@
                         else if (lt.includes('pre-hire') || lt.includes('prehire')) typeValue = 'Pre-hire';
                     }
 
+                    // Extract Employee ID from the 'LABB PASSPORT' button link
+                    let empId = '';
+                    const actionLinks = row.querySelectorAll('a');
+                    for (const link of actionLinks) {
+                        const href = link.getAttribute('href') || '';
+                        const onclick = link.getAttribute('onclick') || '';
+
+                        // Look for organizationEmployee parameter in href or onclick
+                        const idMatch = href.match(/organizationEmployee=([^&]+)/) || onclick.match(/organizationEmployee=([^&']+)/);
+                        if (idMatch) {
+                            empId = idMatch[1];
+                            break;
+                        }
+                    }
+
                     const rowData = {
                         organization: cells[0]?.innerText.trim(),
                         firstName: cells[1]?.innerText.trim(),
@@ -147,7 +162,8 @@
                         phone: cells[4]?.innerText.trim(),
                         position: cells[5]?.innerText.trim() || 'General',
                         type: typeValue,
-                        status: 'Active'
+                        status: 'Active',
+                        empId: empId // Store the ID for direct linking
                     };
 
                     // Check for termination indicators
