@@ -15,8 +15,8 @@
     "content_scripts": [
         {
             "matches": [
-                "https://labbreport.com/screener/organizationEmployee*",
-                "https://labbreport.com/screener/labbPassport/create*"
+                "*://labbreport.com/*",
+                "*://*.labbreport.com/*"
             ],
             "js": [
                 "content.js"
@@ -24,10 +24,12 @@
             "css": [
                 "inject.css"
             ],
-            "all_frames": true
+            "all_frames": true,
+            "run_at": "document_end"
         }
     ],
     "host_permissions": [
-        "https://labbreport.com/*"
+        "*://labbreport.com/*",
+        "*://*.labbreport.com/*"
     ]
 }

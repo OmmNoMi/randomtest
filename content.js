@@ -359,17 +359,28 @@
         setTimeout(() => clearInterval(nativeInterval), 15000);
     }
 
-    setupPassportAutoFill();
+    // Surgical filtering for the scanner initialization
+    const isScanPage = window.location.href.includes('/organizationEmployee');
+    const isPassportPage = window.location.href.includes('/labbPassport/create');
+
+    if (isScanPage) {
+        console.log('%c RANDOM TESTING: EMP-LIST SCANNER ACTIVE ', 'background: #5D3FD3; color: white; border-radius: 4px; padding: 2px 5px; font-weight: bold;');
+        scanner.init();
+    } else if (isPassportPage) {
+        console.log('%c RANDOM TESTING: PASSPORT AUTO-FILL ACTIVE ', 'background: #FF007F; color: white; border-radius: 4px; padding: 2px 5px; font-weight: bold;');
+        setupPassportAutoFill();
+    }
 
     if (!window.rtListenerAdded) {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'PING') {
                 sendResponse({ status: 'PONG' });
             } else if (request.action === 'START_EXTRACTION') {
-                scanner.start(request.itemsPerPage || 50);
+                if (isScanPage) scanner.start(request.itemsPerPage || 50);
                 sendResponse({ status: 'ACK' });
             } else if (request.action === 'GET_METADATA') {
-                sendResponse({ metadata: scanner.extractMetadata() });
+                if (isScanPage) sendResponse({ metadata: scanner.extractMetadata() });
+                else sendResponse({ error: 'Not a scanning page' });
             }
             return true;
         });
