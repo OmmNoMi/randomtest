@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToPoolBtn = document.getElementById('back-to-pool-btn');
     const randomExportSep = document.getElementById('random-export-sep');
     const footerRandomCount = document.getElementById('footer-random-count');
+    const randomCountVal = document.getElementById('random-count-val');
+    const randomTotalVal = document.getElementById('random-total-val');
 
     // Modal elements
     const randomizeModal = document.getElementById('randomize-modal');
@@ -649,6 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update header text
         if (randomResultsTitle) randomResultsTitle.innerText = `${cycleCount} Employee${cycleCount !== 1 ? 's' : ''} Selected`;
         if (randomResultsSubtitle) randomResultsSubtitle.innerText = `${configFrequency.label} • ${configPct}% Annual Rate • Lab Passport Generation`;
+
+        // Update selection summary badge
+        if (randomCountVal) randomCountVal.innerText = cycleCount;
+        if (randomTotalVal) randomTotalVal.innerText = poolSize;
 
         // Populate config strip
         if (randomConfigStrip) {

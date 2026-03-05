@@ -1917,56 +1917,37 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
     flex-shrink: 0;
 }
 
-.random-results-title-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.random-results-meta {
+    flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.random-results-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--primary-glow);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    color: var(--primary);
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 0.6rem;
+.random-results-meta h2 {
+    font-size: 0.95rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    flex-shrink: 0;
+    margin: 0;
 }
 
-.random-results-badge svg {
-    width: 10px;
-    height: 10px;
+.random-results-meta .hint {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.random-results-header .selection-badge {
+    flex-shrink: 0;
 }
 
 .random-results-meta {
     min-width: 0;
 }
 
-.random-results-meta h2 {
-    font-size: 0.88rem;
-    font-weight: 800;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.random-results-meta .hint {
-    font-size: 0.62rem;
-    color: var(--text-muted);
-    margin-top: 1px;
-}
 
 /* On narrow screens: badge + back-btn wrap to their own row above the title */
 
