@@ -810,7 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         csvContent += rows;
 
-        const filenameWithDate = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+        const filenameWithDate = `${filename} - ${new Date().toISOString().split('T')[0]}.csv`;
         console.log(`RandomTesting: Preparing to download CSV as: ${filenameWithDate}`);
 
         try {
@@ -870,18 +870,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
+    function getBaseFilename() {
+        return (currentMetadata?.orgName || 'Organization').trim();
+    }
+
+    downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, `${getBaseFilename()} - All`));
     downloadPoolCsvBtn.addEventListener('click', () => {
         const pool = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey));
-        downloadCSV(pool, 'Labb_Selected_Selection_Pool');
+        downloadCSV(pool, `${getBaseFilename()} - Selected`);
     });
     if (downloadWinnersCsvBtn) {
-        downloadWinnersCsvBtn.addEventListener('click', () => downloadCSV(selectedWinners, 'Random_Testing_Results'));
+        downloadWinnersCsvBtn.addEventListener('click', () => downloadCSV(selectedWinners, `${getBaseFilename()} - Random ${configPct}% - ${configFrequency.label.trim()}`));
     }
     if (downloadRandomCsvBtn) {
         downloadRandomCsvBtn.addEventListener('click', () => {
-            const freq = configFrequency.label.replace(/[^a-zA-Z]/g, '_');
-            downloadCSV(randomizedList, `Random_Selection_${configPct}pct_${freq}`);
+            downloadCSV(randomizedList, `${getBaseFilename()} - Random ${configPct}% - ${configFrequency.label.trim()}`);
         });
     }
 
