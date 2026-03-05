@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "Random Testing",
-    "version": "1.0.1",
+    "name": "OmmNoMi Random Selection Utility",
+    "version": "0.1",
     "description": "Premium tool to automate employee lists and select entries for random testing.",
     "permissions": [
         "activeTab",
