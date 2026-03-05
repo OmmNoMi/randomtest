@@ -813,37 +813,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const filenameWithDate = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
         console.log(`RandomTesting: Preparing to download CSV as: ${filenameWithDate}`);
 
-        // Define a function that will be executed in the context of the main webpage
-        // This completely bypasses Chrome's strict extension popup security rules
-        // which forcefully strip the "download" attribute and rename files to UUIDs.
-        function executeDownloadInPage(csvText, fileName) {
-            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 100);
+        // Encode the string to Base64 to bypass Chrome's Blob UUID file naming issues
+        const base64data = btoa(unescape(encodeURIComponent(csvContent)));
+        const dataUrl = `data:text/csv;charset=utf-8;base64,${base64data}`;
+
+        if (chrome && chrome.downloads && chrome.downloads.download) {
+            console.log('RandomTesting: Triggering chrome.downloads API...');
+            chrome.downloads.download({
+                url: dataUrl,
+                filename: filenameWithDate,
+                saveAs: true // FORCES the save dialog so you can verify it is a .csv
+            }, (downloadId) => {
+                if (chrome.runtime.lastError) {
+                    console.error("RandomTesting: Download error:", chrome.runtime.lastError);
+                    fallbackDownload(dataUrl, filenameWithDate);
+                } else {
+                    console.log("RandomTesting: Download successful with ID:", downloadId);
+                }
+            });
+        } else {
+            console.warn("RandomTesting: Downloads API unavailable, using fallback.");
+            fallbackDownload(dataUrl, filenameWithDate);
         }
 
-        // Inject and execute the download function in the active tab
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs && tabs[0]) {
-                chrome.scripting.executeScript({
-                    target: { tabId: tabs[0].id },
-                    func: executeDownloadInPage,
-                    args: [csvContent, filenameWithDate]
-                }).then(() => {
-                    console.log('RandomTesting: Download triggered successfully via host page.');
-                }).catch(err => {
-                    console.error('RandomTesting: Failed to inject download script:', err);
-                });
-            }
-        });
+        function fallbackDownload(url, fname) {
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fname;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => document.body.removeChild(link), 100);
+        }
     }
 
     downloadAllCsvBtn.addEventListener('click', () => downloadCSV(allEmployees, 'Labb_Full_Master_Pool'));
