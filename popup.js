@@ -694,19 +694,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'passport-card';
             card.innerHTML = `
-                <span class="passport-card-index">#${index + 1}</span>
-                <div class="passport-card-name">${emp.firstName} ${emp.lastName}</div>
+                <div class="passport-card-header">
+                    <div class="passport-card-name">${emp.firstName} ${emp.lastName}</div>
+                    <span class="passport-card-index">#${index + 1}</span>
+                </div>
                 <div class="passport-card-tags">
                     <span class="tag">${emp.position || 'Standard'}</span>
                     <div class="tag-dot"></div>
-                    <span class="tag">${emp.type}</span>
+                    <span class="tag">${emp.type || 'General'}</span>
                     <div class="tag-dot"></div>
                     <span class="status-badge ${statusClass}">${emp.status}</span>
                 </div>
-                ${emp.email ? `<div class="tag" style="font-size:0.58rem; color:var(--text-muted); margin-top:-2px;">${emp.email}</div>` : ''}
+                ${emp.email ? `<div class="tag" style="font-size:0.58rem; color:var(--text-muted);">${emp.email}</div>` : ''}
                 <div class="passport-card-actions">
                     <a href="${passportUrl}" target="_blank" rel="noopener noreferrer" class="passport-btn btn-passport" title="Create Lab Passport for ${emp.firstName} ${emp.lastName}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                             <line x1="12" y1="18" x2="12" y2="12"/>
