@@ -1406,6 +1406,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     justify-content: center;
     padding-top: 8px;
 }
+
 /* RANDOMIZE CONFIG MODAL                                            */
 /* ================================================================ */
 .modal-overlay {
@@ -1695,7 +1696,6 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     align-items: center;
     justify-content: space-between;
     padding: 0 4px;
-    flex-wrap: wrap;
     gap: 8px;
 }
 
@@ -1809,6 +1809,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     display: flex;
     justify-content: space-between;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .preset-btn {
@@ -1842,14 +1843,8 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 /* Frequency */
 .frequency-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 12px;
-}
-
-@media screen and (max-width: 600px) {
-    .frequency-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 .freq-btn {
@@ -2198,6 +2193,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     color: #8b5cf6 !important;
     background: rgba(139, 92, 246, 0.1) !important;
 }
+
 .modal-dropdown-menu {
     position: absolute;
     top: calc(100% + 4px);

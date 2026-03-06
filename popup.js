@@ -572,8 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function syncSliderBackground(pct) {
         annualPctSlider.style.setProperty('--slider-pct', `${pct}%`);
-        // Also set via background directly for cross-browser
-        annualPctSlider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--bg-hover) ${pct}%, var(--bg-hover) 100%)`;
+        // Use border-color for the empty track to remain visible in light mode
+        annualPctSlider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--border-color) ${pct}%, var(--border-color) 100%)`;
     }
     // ---- Frequency Buttons ----
     document.querySelectorAll('.freq-btn').forEach(btn => {
