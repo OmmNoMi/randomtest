@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
     const modalConfirmBtn = document.getElementById('modal-confirm-btn');
     const annualPctSlider = document.getElementById('annual-pct-slider');
-    const annualPctInput = document.getElementById('annual-pct-input');
+    const annualPctBadge = document.getElementById('annual-pct-badge');
     const modalPoolCount = document.getElementById('modal-pool-count');
     const modalAnnualTarget = document.getElementById('modal-annual-target');
     const modalCycleCount = document.getElementById('modal-cycle-count');
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const pct = parseInt(btn.dataset.pct);
             configPct = pct;
             annualPctSlider.value = pct;
-            annualPctInput.value = pct;
+            if (annualPctBadge) annualPctBadge.innerText = pct + '%';
             syncSliderBackground(pct);
             document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
     annualPctSlider.addEventListener('input', () => {
         const val = parseInt(annualPctSlider.value);
         configPct = val;
-        annualPctInput.value = val;
+        if (annualPctBadge) annualPctBadge.innerText = val + '%';
         syncSliderBackground(val);
         // Update preset active state
         document.querySelectorAll('.preset-btn').forEach(b => {
@@ -568,18 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateModalCalculations();
     });
-    // ---- Number Input ----
-    annualPctInput.addEventListener('input', () => {
-        let val = parseInt(annualPctInput.value) || 1;
-        val = Math.min(100, Math.max(1, val));
-        configPct = val;
-        annualPctSlider.value = val;
-        syncSliderBackground(val);
-        document.querySelectorAll('.preset-btn').forEach(b => {
-            b.classList.toggle('active', parseInt(b.dataset.pct) === val);
-        });
-        updateModalCalculations();
-    });
+    // ---- Input Event Deleted (Badge Replace) ----
+
     function syncSliderBackground(pct) {
         annualPctSlider.style.setProperty('--slider-pct', `${pct}%`);
         // Also set via background directly for cross-browser
@@ -865,7 +855,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const orgNameEl = document.getElementById('display-org-name');
         const orgIdEl = document.getElementById('display-org-id');
         const userEl = document.getElementById('display-user');
+        const modalOrgNameEl = document.getElementById('modal-org-name');
         if (orgNameEl) orgNameEl.innerText = meta.orgName || '---';
+        if (modalOrgNameEl) modalOrgNameEl.innerText = meta.orgName || 'Organization';
         if (orgIdEl) orgIdEl.innerText = meta.orgId || '---';
         if (userEl) userEl.innerText = meta.userName || '---';
 

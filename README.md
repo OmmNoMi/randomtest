@@ -7,8 +7,9 @@ The OmmNoMi tool for Random Testing. A professional-grade Chrome extension desig
 
 ## ✨ Features
 
-- **Passport Auto-Fill**: Automatically pre-selects "Random" as the Testing Reason when navigating to the Labb Passport page from the utility. Uses a CSP-compliant "Main World" injection for 100% reliability.
-- **Aesthetic Redesign**: Modern "Premium Dark" glassmorphism theme with a dedicated Light Mode toggle.
+- **Passport Auto-Fill**: Automatically pre-selects "Random" as the Testing Reason and auto-selects your configured **Testing Panel** when navigating to the Labb Passport page from the utility. Uses a CSP-compliant "Main World" injection for 100% reliability.
+- **Dynamic Panel Configuration**: Automatically scrapes available testing panels from LabbReport and allows seamless selection via a custom dropdown in the Randomize modal.
+- **Aesthetic Redesign**: Modern "Premium Dark" glassmorphism theme with a dedicated Light Mode toggle and dynamic stat-cards in the configuration modal.
 - **Inclusion State Filters**: Isolate "Selected" vs "Unselected" pools with a single click to review your targets before randomization.
 - **Responsive Layout**: Intelligent toolbar stacking — mobile shows a full-width stacked layout; desktop uses a side-by-side toolbar with search, filters, and batch actions on one row.
 - **Context-Aware Header**: Organization name & ID and current user are surfaced directly in the header on desktop for at-a-glance context without wasting space.

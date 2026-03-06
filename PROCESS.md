@@ -68,6 +68,17 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - **Robust Polling & Observation**: Combined a `MutationObserver` with a failsafe 10-second polling interval to ensure the auto-fill "sticks" even if the page re-renders multiple times during initialization.
 - **URL Engine Updates**: Modified the extraction logic to append `autoreason=random` to generated Passport URLs, providing a seamless "click-to-automated-form" transition.
 
+### Phase 7: UI Overhaul & Advanced Configuration (v0.2)
+- **Dynamic Panel Integration**: 
+    - Implemented background scraping in `content.js` to extract available Testing Panels from LabbReport's DOM.
+    - Built a custom Panel Configuration dropdown in the selection modal that saves preferences to `chrome.storage.local`.
+- **Enhanced Auto-Fill Bridge**: Updated the `passport-inject.js` Main World script to not only set the testing reason to "Random," but to concurrently auto-fill the `testing_panel_id_hash` drop-down, streamlining the generation process.
+- **Modal UI Redesign & Styling**:
+    - Replaced basic alerts with a modern React-inspired modal featuring summary stat-cards (Total Pool, Annual Target, This Cycle).
+    - Fixed critical CSS structural bugs including adding `position: absolute` overlay behavior to the custom panel dropdown and resolving wrap issues on mobile layout text. 
+    - Resolved a dynamic calculation bug caused by missing DOM bindings (`annualPctInput`) during the UI rewrite.
+- **Premium Dark Mode**: Shifted the dark mode color palette from harsh blacks to sophisticated indigo and slate tones for a significantly improved, modern aesthetic.
+
 ## 🏗️ Architectural Decisions
 
 ### 1. Data Storage Strategy
@@ -102,4 +113,4 @@ This document serves as a comprehensive log of the development lifecycle, archit
 - [ ] **Export Formats**: Add direct PDF export functionality for compliance record-keeping.
 
 ---
-*Last Updated: March 5, 2026*
+*Last Updated: March 6, 2026*
