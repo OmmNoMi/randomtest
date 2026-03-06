@@ -1843,7 +1843,7 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
 /* Frequency */
 .frequency-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
