@@ -54,8 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalPoolCount = document.getElementById('modal-pool-count');
     const modalAnnualTarget = document.getElementById('modal-annual-target');
     const modalCycleCount = document.getElementById('modal-cycle-count');
-    const modalRatioCycle = document.getElementById('modal-ratio-cycle');
-    const modalRatioPool = document.getElementById('modal-ratio-pool');
+    const modalRatioCycle = null; // legacy, replaced by modal-selected-count
+    const modalRatioPool = null;   // legacy
+    const modalSelectedCount = document.getElementById('modal-selected-count');
     // Panel dropdown elements
     const panelDropdownBtn = document.getElementById('panel-dropdown-btn');
     const panelDropdownMenu = document.getElementById('panel-dropdown-menu');
@@ -601,15 +602,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (poolSize === undefined) {
             poolSize = allEmployees.filter(emp => !excludedIds.has(emp.uniqueKey)).length;
         }
+        const selectedCount = poolSize; // selected = non-excluded employees in pool
         const annualTarget = Math.ceil((poolSize * configPct) / 100);
         const cycleCount = Math.ceil(annualTarget / configFrequency.cycles);
-        // Update pool strip cards
-        if (modalPoolCount) modalPoolCount.innerText = poolSize;
+        // Update stat cards
+        if (modalPoolCount) modalPoolCount.innerText = allEmployees.length;
+        if (modalSelectedCount) modalSelectedCount.innerText = selectedCount;
         if (modalAnnualTarget) modalAnnualTarget.innerText = annualTarget;
         if (modalCycleCount) modalCycleCount.innerText = cycleCount;
-        // Update ratio card (4th card: "X of Y")
-        if (modalRatioCycle) modalRatioCycle.innerText = cycleCount;
-        if (modalRatioPool) modalRatioPool.innerText = poolSize;
     }
     // ---- Confirm -> Generate Random List ----
     modalConfirmBtn.addEventListener('click', () => {

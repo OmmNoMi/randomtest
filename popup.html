@@ -384,34 +384,85 @@
                 </button>
             </div>
 
-            <!-- Pool Info Strip -->
-            <div class="modal-pool-strip">
-                <div class="pool-stat">
-                    <span class="pool-stat-value" id="modal-pool-count">0</span>
-                    <span class="pool-stat-label">Employees in Pool</span>
+            <!-- Pool Stats Grid -->
+            <div class="modal-stats-grid">
+                <div class="modal-stat-card">
+                    <div class="modal-stat-icon icon-slate">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                            <path d="M16 3.13a4 4 0 010 7.75" />
+                        </svg>
+                    </div>
+                    <span class="modal-stat-label">Total Pool</span>
+                    <span class="modal-stat-value" id="modal-pool-count">0</span>
                 </div>
-                <div class="pool-stat-divider"></div>
-                <div class="pool-stat">
-                    <span class="pool-stat-value accent" id="modal-annual-target">0</span>
-                    <span class="pool-stat-label">Annual Target</span>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-icon icon-blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <polyline points="17 11 19 13 23 9" />
+                        </svg>
+                    </div>
+                    <span class="modal-stat-label">Selected</span>
+                    <span class="modal-stat-value" id="modal-selected-count">0</span>
                 </div>
-                <div class="pool-stat-divider"></div>
-                <div class="pool-stat">
-                    <span class="pool-stat-value highlight" id="modal-cycle-count">0</span>
-                    <span class="pool-stat-label">This Cycle</span>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-icon icon-indigo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                    </div>
+                    <span class="modal-stat-label">Annual Target</span>
+                    <span class="modal-stat-value" id="modal-annual-target">0</span>
                 </div>
-                <div class="pool-stat-divider"></div>
-                <div class="pool-stat">
-                    <span class="pool-stat-value ratio-value" id="modal-ratio-display">
-                        <span id="modal-ratio-cycle">0</span><span class="ratio-sep"> of </span><span
-                            id="modal-ratio-pool">0</span>
-                    </span>
-                    <span class="pool-stat-label">Selected / Pool</span>
+                <div class="modal-stat-card highlight">
+                    <div class="modal-stat-icon icon-purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                    </div>
+                    <span class="modal-stat-label">This Cycle</span>
+                    <span class="modal-stat-value" id="modal-cycle-count">0</span>
                 </div>
             </div>
 
             <!-- Config Fields -->
             <div class="modal-body">
+
+                <!-- Panel Configuration (first, as per design) -->
+                <div class="config-field">
+                    <label class="config-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        Panel Configuration
+                    </label>
+                    <p class="config-hint">Select the specific drug test panel for this selection</p>
+                    <div class="dropdown-wrapper w-full">
+                        <button id="panel-dropdown-btn" class="dropdown-btn w-full">
+                            <span id="selected-panel-name">Select Panel...</span>
+                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                        <div id="panel-dropdown-menu" class="dropdown-menu hidden w-full">
+                            <div id="panel-options" class="checkbox-group">
+                                <!-- Dynamic Panel List -->
+                                <div class="loading-panels"
+                                    style="padding: 10px; font-size: 0.7rem; color: var(--text-muted);">
+                                    Loading panels...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Annual Testing % -->
                 <div class="config-field">
@@ -473,36 +524,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Panel Configuration (New) -->
-                <div class="config-field">
-                    <label class="config-label">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        Panel Configuration
-                    </label>
-                    <p class="config-hint">Select the specific drug test panel for this selection</p>
-                    <div class="dropdown-wrapper w-full">
-                        <button id="panel-dropdown-btn" class="dropdown-btn w-full">
-                            <span id="selected-panel-name">Select Panel...</span>
-                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9" />
-                            </svg>
-                        </button>
-                        <div id="panel-dropdown-menu" class="dropdown-menu hidden w-full">
-                            <div id="panel-options" class="checkbox-group">
-                                <!-- Dynamic Panel List -->
-                                <div class="loading-panels"
-                                    style="padding: 10px; font-size: 0.7rem; color: var(--text-muted);">
-                                    Loading panels...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
 
             </div>
 

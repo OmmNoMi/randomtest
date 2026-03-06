@@ -1471,116 +1471,94 @@ body.light-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     height: 14px;
 }
 
-/* Pool Info Strip */
-.modal-pool-strip {
+/* Modal Stats Grid (replaces old flat strip) */
+.modal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px 14px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+}
+
+@media screen and (max-width: 449px) {
+    .modal-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.modal-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: all 0.2s;
+}
+
+.modal-stat-card.highlight {
+    background: rgba(139, 92, 246, 0.06);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.modal-stat-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0;
-    padding: 12px 16px;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-strong);
-    overflow: hidden;
-}
-
-/* On very narrow screens: 2×2 grid for the 4 stat cards */
-@media screen and (max-width: 449px) {
-    .modal-pool-strip {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-        padding: 8px 12px;
-    }
-
-    /* Hide the vertical dividers in grid mode */
-    .pool-stat-divider {
-        display: none;
-    }
-
-    .pool-stat {
-        padding: 8px 4px;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    /* Bottom-row cards get no bottom border */
-    .pool-stat:nth-child(5),
-    .pool-stat:nth-child(7) {
-        border-bottom: none;
-    }
-
-    /* Add right border between left and right columns */
-    .pool-stat:nth-child(1),
-    .pool-stat:nth-child(5) {
-        border-right: 1px solid var(--border-color);
-    }
-
-    .pool-stat-value {
-        font-size: 1.1rem;
-    }
-
-    .pool-stat-value.ratio-value {
-        font-size: 0.82rem;
-    }
-}
-
-.pool-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    flex: 1;
-    text-align: center;
-}
-
-.pool-stat-divider {
-    width: 1px;
-    height: 32px;
-    background: var(--border-color);
     flex-shrink: 0;
 }
 
-.pool-stat-value {
-    font-size: 1.4rem;
+.modal-stat-icon svg {
+    width: 13px;
+    height: 13px;
+}
+
+.modal-stat-icon.icon-slate {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+}
+
+.modal-stat-icon.icon-blue {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.modal-stat-icon.icon-indigo {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary);
+}
+
+.modal-stat-icon.icon-purple {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+}
+
+.modal-stat-label {
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.modal-stat-value {
+    font-size: 1.35rem;
     font-weight: 900;
     color: var(--text-primary);
     line-height: 1;
 }
 
-.pool-stat-value.accent {
-    color: var(--primary);
+.modal-stat-card.highlight .modal-stat-label {
+    color: #a78bfa;
 }
 
-.pool-stat-value.highlight {
-    color: #22c55e;
-}
-
-/* 4th card: ratio display — smaller font to fit "X of Y" */
-.pool-stat-value.ratio-value {
-    font-size: 0.95rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 2px;
-    line-height: 1.1;
-}
-
-.ratio-sep {
-    font-size: 0.55rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 0 1px;
-}
-
-.pool-stat-label {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
+.modal-stat-card.highlight .modal-stat-value {
+    color: #7c3aed;
 }
 
 /* Modal Body */
