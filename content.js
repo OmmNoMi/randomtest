@@ -119,6 +119,36 @@
             return { orgId, orgName, userName, totalRecords, scanDate: new Date().toLocaleString() };
         }
 
+        async scrapePanels(orgId) {
+            console.log('RandomizePro: Scraping panels for org:', orgId);
+            try {
+                const response = await fetch(`https://labbreport.com/screener/panel?organization_id=${orgId}`);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const rows = doc.querySelectorAll('table tbody tr');
+                const panels = [];
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    // Panel table typically: Name(0), Product(1), Display(2), ...
+                    if (cells.length >= 3) {
+                        const name = cells[0].innerText.trim();
+                        const display = cells[2].innerText.trim().toLowerCase();
+                        if (display === 'yes' && name) {
+                            panels.push(name);
+                        }
+                    }
+                });
+
+                console.log('RandomizePro: Found panels:', panels);
+                return panels;
+            } catch (err) {
+                console.error('RandomizePro: Failed to scrape panels:', err);
+                return [];
+            }
+        }
+
         async setPageSize(size) {
             const selector = document.querySelector('select[name="items_per_page"]') ||
                 [...document.querySelectorAll('select')].find(s => s.innerText.includes('10\n25\n50'));
@@ -293,6 +323,11 @@
             } else if (request.action === 'GET_METADATA') {
                 if (isScanPage) sendResponse({ metadata: scanner.extractMetadata() });
                 else sendResponse({ error: 'Not a scanning page' });
+            } else if (request.action === 'SCRAPE_PANELS') {
+                scanner.scrapePanels(request.orgId).then(panels => {
+                    sendResponse({ panels });
+                });
+                return true; // Keep channel open for async response
             }
             return true;
         });

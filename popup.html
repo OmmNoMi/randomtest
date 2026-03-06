@@ -474,6 +474,35 @@
                     </div>
                 </div>
 
+                <!-- Panel Configuration (New) -->
+                <div class="config-field">
+                    <label class="config-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        Panel Configuration
+                    </label>
+                    <p class="config-hint">Select the specific drug test panel for this selection</p>
+                    <div class="dropdown-wrapper w-full">
+                        <button id="panel-dropdown-btn" class="dropdown-btn w-full">
+                            <span id="selected-panel-name">Select Panel...</span>
+                            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                        <div id="panel-dropdown-menu" class="dropdown-menu hidden w-full">
+                            <div id="panel-options" class="checkbox-group">
+                                <!-- Dynamic Panel List -->
+                                <div class="loading-panels"
+                                    style="padding: 10px; font-size: 0.7rem; color: var(--text-muted);">
+                                    Loading panels...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
             </div>
 
