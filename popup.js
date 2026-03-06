@@ -365,6 +365,10 @@ document.addEventListener('DOMContentLoaded', () => {
         saveFilters();
         renderUI();
     });
+    filterDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterMenu.classList.toggle('hidden');
+    });
     document.addEventListener('click', (e) => {
         if (filterMenu && !filterMenu.contains(e.target) && e.target !== filterDropdownBtn) {
             filterMenu.classList.add('hidden');
